@@ -34,8 +34,8 @@ public class DoOptions extends DeterminableMethod {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoOptions.class);
 
-    private IWebdavStore _store;
-    private ResourceLocks _resourceLocks;
+    private final IWebdavStore _store;
+    private final ResourceLocks _resourceLocks;
 
     public DoOptions(IWebdavStore store, ResourceLocks resLocks) {
         _store = store;

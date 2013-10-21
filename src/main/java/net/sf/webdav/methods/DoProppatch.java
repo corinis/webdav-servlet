@@ -34,9 +34,9 @@ public class DoProppatch extends AbstractMethod {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoProppatch.class);
 
-    private boolean _readOnly;
-    private IWebdavStore _store;
-    private ResourceLocks _resourceLocks;
+    private final boolean _readOnly;
+    private final IWebdavStore _store;
+    private final ResourceLocks _resourceLocks;
 
     public DoProppatch(IWebdavStore store, ResourceLocks resLocks,
             boolean readOnly) {

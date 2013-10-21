@@ -48,12 +48,11 @@ public abstract class AbstractMethod implements IMethodExecutor {
 
     private static final ThreadLocal<DateFormat> thLastmodifiedDateFormat = new ThreadLocal<DateFormat>();
     private static final ThreadLocal<DateFormat> thCreationDateFormat = new ThreadLocal<DateFormat>();
-    private static final ThreadLocal<DateFormat> thLocalDateFormat = new ThreadLocal<DateFormat>();
-    
+
     /**
      * Array containing the safe characters set.
      */
-    protected static URLEncoder URL_ENCODER;
+    protected final static URLEncoder URL_ENCODER;
 
     /**
      * Default depth is infite.
@@ -132,15 +131,6 @@ public abstract class AbstractMethod implements IMethodExecutor {
         return df.format(date);
     }
 
-    public static String getLocalDateFormat(final Date date, final Locale loc) {
-        DateFormat df = thLocalDateFormat.get();
-        if( df == null ) {
-            df = new SimpleDateFormat(LOCAL_DATE_FORMAT, loc);
-        }
-        return df.format(date);
-    }
-
-    
     /**
      * Return the relative path associated with this servlet.
      * 
@@ -252,7 +242,7 @@ public abstract class AbstractMethod implements IMethodExecutor {
     /**
      * Get the ETag associated with a file.
      * 
-     * @param StoredObject
+     * @param so
      *      StoredObject to get resourceLength, lastModified and a hashCode of
      *      StoredObject
      * @return the ETag
@@ -321,7 +311,8 @@ public abstract class AbstractMethod implements IMethodExecutor {
      * the If-Header to make sure the If-Header corresponds to the locked
      * resource. Returning true if no lock exists or the If-Header is
      * corresponding to the locked resource
-     * 
+     *
+     * @param transaction
      * @param req
      *      Servlet request
      * @param resp
@@ -329,8 +320,6 @@ public abstract class AbstractMethod implements IMethodExecutor {
      * @param resourceLocks
      * @param path
      *      path to the resource
-     * @param errorList
-     *      List of error to be displayed
      * @return true if no lock on a resource with the given path exists or if
      *  the If-Header corresponds to the locked resource
      * @throws IOException

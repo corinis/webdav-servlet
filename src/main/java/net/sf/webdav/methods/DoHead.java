@@ -34,12 +34,12 @@ import net.sf.webdav.locking.ResourceLocks;
 
 public class DoHead extends AbstractMethod {
 
-    protected String _dftIndexFile;
-    protected IWebdavStore _store;
-    protected String _insteadOf404;
-    protected ResourceLocks _resourceLocks;
-    protected IMimeTyper _mimeTyper;
-    protected int _contentLength;
+    protected final String _dftIndexFile;
+    protected final IWebdavStore _store;
+    protected final String _insteadOf404;
+    protected final ResourceLocks _resourceLocks;
+    protected final IMimeTyper _mimeTyper;
+    protected final int _contentLength;
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoHead.class);

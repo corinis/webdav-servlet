@@ -70,9 +70,9 @@ public class DoPropfind extends AbstractMethod {
      */
     private static final int FIND_PROPERTY_NAMES = 2;
 
-    private IWebdavStore _store;
-    private ResourceLocks _resourceLocks;
-    private IMimeTyper _mimeTyper;
+    private final IWebdavStore _store;
+    private final ResourceLocks _resourceLocks;
+    private final IMimeTyper _mimeTyper;
 
     private int _depth;
 

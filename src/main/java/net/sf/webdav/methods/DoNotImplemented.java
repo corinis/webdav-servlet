@@ -13,7 +13,7 @@ public class DoNotImplemented implements IMethodExecutor {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoNotImplemented.class);
-    private boolean _readOnly;
+    private final boolean _readOnly;
 
     public DoNotImplemented(boolean readOnly) {
         _readOnly = readOnly;

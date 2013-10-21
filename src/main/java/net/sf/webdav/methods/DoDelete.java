@@ -37,9 +37,9 @@ public class DoDelete extends AbstractMethod {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoDelete.class);
 
-    private IWebdavStore _store;
-    private ResourceLocks _resourceLocks;
-    private boolean _readOnly;
+    private final IWebdavStore _store;
+    private final ResourceLocks _resourceLocks;
+    private final boolean _readOnly;
 
     public DoDelete(IWebdavStore store, ResourceLocks resourceLocks,
             boolean readOnly) {
