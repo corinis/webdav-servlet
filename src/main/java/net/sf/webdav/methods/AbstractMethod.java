@@ -24,7 +24,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -45,8 +47,8 @@ import net.sf.webdav.locking.LockedObject;
 
 public abstract class AbstractMethod implements IMethodExecutor {
 
-    private static final ThreadLocal<DateFormat> thLastmodifiedDateFormat = new ThreadLocal<DateFormat>();
-    private static final ThreadLocal<DateFormat> thCreationDateFormat = new ThreadLocal<DateFormat>();
+    private static final Queue<DateFormat> thLastmodifiedDateFormat = new ConcurrentLinkedQueue<DateFormat>();
+    private static final Queue<DateFormat> thCreationDateFormat = new ConcurrentLinkedQueue<DateFormat>();
 
     /**
      * Array containing the safe characters set.
@@ -110,24 +112,32 @@ public abstract class AbstractMethod implements IMethodExecutor {
     protected static final int TEMP_TIMEOUT = 10;
 
     
-    public static String lastModifiedDateFormat(final Date date) {
-        DateFormat df = thLastmodifiedDateFormat.get();
-        if( df == null ) {
-            df = new SimpleDateFormat(LAST_MODIFIED_DATE_FORMAT, Locale.US);
-            df.setTimeZone(TimeZone.getTimeZone("GMT"));
-            thLastmodifiedDateFormat.set( df );
+    public String lastModifiedDateFormat(final Date date) {
+        DateFormat df = thLastmodifiedDateFormat.poll();
+        try {
+            if( df == null ) {
+                df = new SimpleDateFormat(LAST_MODIFIED_DATE_FORMAT, Locale.US);
+                df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+            }
+            return df.format(date);
+        } finally {
+            thLastmodifiedDateFormat.add( df );
         }
-        return df.format(date);
     }
 
-    public static String creationDateFormat(final Date date) {
-        DateFormat df = thCreationDateFormat.get();
-        if( df == null ) {
-            df = new SimpleDateFormat(CREATION_DATE_FORMAT);
-            df.setTimeZone(TimeZone.getTimeZone("GMT"));
-            thCreationDateFormat.set( df );
+    public String creationDateFormat(final Date date) {
+        DateFormat df = thCreationDateFormat.poll();
+        try {
+            if( df == null ) {
+                df = new SimpleDateFormat(CREATION_DATE_FORMAT);
+                df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+            }
+            return df.format(date);
+        } finally {
+            thCreationDateFormat.add( df );
         }
-        return df.format(date);
     }
 
     /**
