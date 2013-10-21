@@ -2,7 +2,7 @@ package net.sf.webdav.methods;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -57,7 +57,7 @@ public class DoProppatch extends AbstractMethod {
         String path = getRelativePath(req);
         String parentPath = getParentPath(getCleanPath(path));
 
-        Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+        Map<String, Integer> errorList = new HashMap<String, Integer>();
 
         if (!checkLocks(transaction, req, resp, _resourceLocks, parentPath)) {
             resp.setStatus(WebdavStatus.SC_LOCKED);
@@ -104,7 +104,7 @@ public class DoProppatch extends AbstractMethod {
                 boolean lockTokenMatchesIfHeader = (lockTokens != null && lockTokens[0].equals(lo.getID()));
                 if (lo != null && lo.isExclusive() && !lockTokenMatchesIfHeader) {
                     // Object on specified path is LOCKED
-                    errorList = new Hashtable<String, Integer>();
+                    errorList = new HashMap<String, Integer>();
                     errorList.put(path, new Integer(WebdavStatus.SC_LOCKED));
                     sendReport(req, resp, errorList);
                     return;

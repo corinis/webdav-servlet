@@ -28,7 +28,8 @@ import net.sf.webdav.locking.ResourceLocks;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DoMove extends AbstractMethod {
 
@@ -57,7 +58,7 @@ public class DoMove extends AbstractMethod {
             LOG.trace("-- " + this.getClass().getName());
 
             String sourcePath = getRelativePath(req);
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<String, Integer>();
 
             if (!checkLocks(transaction, req, resp, _resourceLocks, sourcePath)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);
@@ -88,7 +89,7 @@ public class DoMove extends AbstractMethod {
                     }else{
                         if (_doCopy.copyResource(transaction, req, resp)) {
 
-                            errorList = new Hashtable<String, Integer>();
+                            errorList = new HashMap<String, Integer>();
                             _doDelete.deleteResource(transaction, sourcePath,
                                     errorList, req, resp);
                             if (!errorList.isEmpty()) {

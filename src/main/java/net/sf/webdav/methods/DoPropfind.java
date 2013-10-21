@@ -18,7 +18,7 @@ package net.sf.webdav.methods;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -173,17 +173,17 @@ public class DoPropfind extends AbstractMethod {
             } catch (AccessDeniedException e) {
                 resp.sendError(WebdavStatus.SC_FORBIDDEN);
             } catch (WebdavException e) {
-                LOG.warn("Sending internal error!");
+                LOG.warn("Sending internal error!",e);
                 resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
             } catch (ServletException e) {
-                e.printStackTrace(); // To change body of catch statement use
-                // File | Settings | File Templates.
+                LOG.warn("Sending internal error!", e);
+                resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
             } finally {
                 _resourceLocks.unlockTemporaryLockedObjects(transaction, path,
                         tempLockOwner);
             }
         } else {
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<String, Integer>();
             errorList.put(path, WebdavStatus.SC_LOCKED);
             sendReport(req, resp, errorList);
         }

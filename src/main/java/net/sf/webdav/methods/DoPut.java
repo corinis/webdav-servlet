@@ -16,7 +16,8 @@
 package net.sf.webdav.methods;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +61,7 @@ public class DoPut extends AbstractMethod {
 
             String userAgent = req.getHeader("User-Agent");
 
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<String, Integer>();
 
             if (!checkLocks(transaction, req, resp, _resourceLocks, parentPath)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);

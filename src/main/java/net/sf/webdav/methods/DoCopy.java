@@ -26,7 +26,9 @@ import net.sf.webdav.locking.ResourceLocks;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map;
 
 public class DoCopy extends AbstractMethod {
 
@@ -118,7 +120,7 @@ public class DoCopy extends AbstractMethod {
             return false;
         }
 
-        Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+        Map<String, Integer> errorList = new HashMap<String, Integer>();
         String parentDestinationPath = getParentPath(getCleanPath(destinationPath));
 
         if (!checkLocks(transaction, req, resp, _resourceLocks,
@@ -163,8 +165,6 @@ public class DoCopy extends AbstractMethod {
                     resp.sendError(WebdavStatus.SC_METHOD_NOT_ALLOWED);
                     return false;
                 }
-
-                errorList = new Hashtable<String, Integer>();
 
                 destinationSo = _store.getStoredObject(transaction,
                         destinationPath);
@@ -230,7 +230,7 @@ public class DoCopy extends AbstractMethod {
      * @throws IOException
      */
     private void copy(ITransaction transaction, String sourcePath,
-            String destinationPath, Hashtable<String, Integer> errorList,
+            String destinationPath, Map<String, Integer> errorList,
             HttpServletRequest req, HttpServletResponse resp)
             throws WebdavException, IOException {
 
@@ -279,7 +279,7 @@ public class DoCopy extends AbstractMethod {
      *      if an error in the underlying store occurs
      */
     private void copyFolder(ITransaction transaction, String sourcePath,
-            String destinationPath, Hashtable<String, Integer> errorList,
+            String destinationPath, Map<String, Integer> errorList,
             HttpServletRequest req, HttpServletResponse resp)
             throws WebdavException {
 

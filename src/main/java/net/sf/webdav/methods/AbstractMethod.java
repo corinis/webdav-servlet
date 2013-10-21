@@ -21,10 +21,9 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.ServletException;
@@ -377,11 +376,11 @@ public abstract class AbstractMethod implements IMethodExecutor {
      *      List of error to be displayed
      */
     protected void sendReport(HttpServletRequest req, HttpServletResponse resp,
-            Hashtable<String, Integer> errorList) throws IOException {
+            Map<String, Integer> errorList) throws IOException {
 
         if (errorList.size() == 1) {
-            int code = errorList.elements().nextElement();
-            if (WebdavStatus.getStatusText(code) != "") {
+            int code = errorList.values().iterator().next();
+            if (!"".equals(WebdavStatus.getStatusText(code))) {
                 resp.sendError(code, WebdavStatus.getStatusText(code));
             } else {
                 resp.sendError(code);
@@ -402,11 +401,9 @@ public abstract class AbstractMethod implements IMethodExecutor {
 
             generatedXML.writeElement("DAV::multistatus", XMLWriter.OPENING);
 
-            Enumeration<String> pathList = errorList.keys();
-            while (pathList.hasMoreElements()) {
+            for (String errorPath : errorList.keySet()) {
 
-                String errorPath = (String) pathList.nextElement();
-                int errorCode = ((Integer) errorList.get(errorPath)).intValue();
+                int errorCode = errorList.get(errorPath);
 
                 generatedXML.writeElement("DAV::response", XMLWriter.OPENING);
 
@@ -421,8 +418,9 @@ public abstract class AbstractMethod implements IMethodExecutor {
                             + errorPath.length();
                     toAppend = absoluteUri.substring(0, endIndex);
                 }
-                if (!toAppend.startsWith("/") && !toAppend.startsWith("http:"))
+                if (!toAppend.startsWith("/") && !toAppend.startsWith("http:")) {
                     toAppend = "/" + toAppend;
+                }
                 generatedXML.writeText(errorPath);
                 generatedXML.writeElement("DAV::href", XMLWriter.CLOSING);
                 generatedXML.writeElement("DAV::status", XMLWriter.OPENING);

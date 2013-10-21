@@ -16,7 +16,8 @@
 package net.sf.webdav.methods;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,13 +56,12 @@ public class DoMkcol extends AbstractMethod {
             String path = getRelativePath(req);
             String parentPath = getParentPath(getCleanPath(path));
 
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<String, Integer>();
 
             if (!checkLocks(transaction, req, resp, _resourceLocks, parentPath)) {
                 // TODO remove
-                LOG
-                        .trace("MkCol on locked resource (parentPath) not executable!"
-                                + "\n Sending SC_FORBIDDEN (403) error response!");
+                LOG.trace("MkCol on locked resource (parentPath) not executable!"
+                        + "\n Sending SC_FORBIDDEN (403) error response!");
 
                 resp.sendError(WebdavStatus.SC_FORBIDDEN);
                 return;

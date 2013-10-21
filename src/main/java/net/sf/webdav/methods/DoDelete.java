@@ -16,7 +16,9 @@
 package net.sf.webdav.methods;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +36,7 @@ import net.sf.webdav.locking.ResourceLocks;
 
 public class DoDelete extends AbstractMethod {
 
+    private static final String[] EMPTY = new String[] {};
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoDelete.class);
 
@@ -56,8 +59,6 @@ public class DoDelete extends AbstractMethod {
             String path = getRelativePath(req);
             String parentPath = getParentPath(getCleanPath(path));
 
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
-
             if (!checkLocks(transaction, req, resp, _resourceLocks, parentPath)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);
                 return; // parent is locked
@@ -73,7 +74,7 @@ public class DoDelete extends AbstractMethod {
             if (_resourceLocks.lock(transaction, path, tempLockOwner, false, 0,
                     TEMP_TIMEOUT, TEMPORARY)) {
                 try {
-                    errorList = new Hashtable<String, Integer>();
+                    Map<String, Integer> errorList = new HashMap<String, Integer>();
                     deleteResource(transaction, path, errorList, req, resp);
                     if (!errorList.isEmpty()) {
                         sendReport(req, resp, errorList);
@@ -118,7 +119,7 @@ public class DoDelete extends AbstractMethod {
      *      when an error occurs while sending the response
      */
     public void deleteResource(ITransaction transaction, String path,
-            Hashtable<String, Integer> errorList, HttpServletRequest req,
+            Map<String, Integer> errorList, HttpServletRequest req,
             HttpServletResponse resp) throws IOException, WebdavException {
 
         resp.setStatus(WebdavStatus.SC_NO_CONTENT);
@@ -168,11 +169,11 @@ public class DoDelete extends AbstractMethod {
      *      if an error in the underlying store occurs
      */
     private void deleteFolder(ITransaction transaction, String path,
-            Hashtable<String, Integer> errorList, HttpServletRequest req,
+            Map<String, Integer> errorList, HttpServletRequest req,
             HttpServletResponse resp) throws WebdavException {
 
         String[] children = _store.getChildrenNames(transaction, path);
-        children = children == null ? new String[] {} : children;
+        children = children == null ? EMPTY : children;
         StoredObject so = null;
         for (int i = children.length - 1; i >= 0; i--) {
             children[i] = "/" + children[i];

@@ -17,7 +17,7 @@ package net.sf.webdav.methods;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -594,7 +594,7 @@ public class DoLock extends AbstractMethod {
     private void sendLockFailError(ITransaction transaction,
                                    HttpServletRequest req, HttpServletResponse resp, State state)
             throws IOException {
-        Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
+        Map<String, Integer> errorList = new HashMap<String, Integer>();
         errorList.put(state._path, WebdavStatus.SC_LOCKED);
         sendReport(req, resp, errorList);
     }
