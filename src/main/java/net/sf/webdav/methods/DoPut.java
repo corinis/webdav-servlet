@@ -36,12 +36,11 @@ public class DoPut extends AbstractMethod {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
             .getLogger(DoPut.class);
 
-    private IWebdavStore _store;
-    private IResourceLocks _resourceLocks;
-    private boolean _readOnly;
-    private boolean _lazyFolderCreationOnPut;
+    private final IWebdavStore _store;
+    private final IResourceLocks _resourceLocks;
+    private final boolean _readOnly;
+    private final boolean _lazyFolderCreationOnPut;
 
-    private String _userAgent;
 
     public DoPut(IWebdavStore store, IResourceLocks resLocks, boolean readOnly,
             boolean lazyFolderCreationOnPut) {
@@ -59,7 +58,7 @@ public class DoPut extends AbstractMethod {
             String path = getRelativePath(req);
             String parentPath = getParentPath(path);
 
-            _userAgent = req.getHeader("User-Agent");
+            String userAgent = req.getHeader("User-Agent");
 
             Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
 
@@ -144,7 +143,7 @@ public class DoPut extends AbstractMethod {
                         }
                     }
                     // User-Agent workarounds
-                    doUserAgentWorkaround(resp);
+                    doUserAgentWorkaround(resp, userAgent);
 
                     // setting resourceContent
                     long resourceLength = _store
@@ -175,18 +174,19 @@ public class DoPut extends AbstractMethod {
 
     /**
      * @param resp
+     * @param userAgent
      */
-    private void doUserAgentWorkaround(HttpServletResponse resp) {
-        if (_userAgent != null && _userAgent.indexOf("WebDAVFS") != -1
-                && _userAgent.indexOf("Transmit") == -1) {
+    private void doUserAgentWorkaround(HttpServletResponse resp, String userAgent) {
+        if (userAgent != null && userAgent.indexOf("WebDAVFS") != -1
+                && userAgent.indexOf("Transmit") == -1) {
             LOG.trace("DoPut.execute() : do workaround for user agent '"
-                    + _userAgent + "'");
+                    + userAgent + "'");
             resp.setStatus(WebdavStatus.SC_CREATED);
-        } else if (_userAgent != null && _userAgent.indexOf("Transmit") != -1) {
+        } else if (userAgent != null && userAgent.indexOf("Transmit") != -1) {
             // Transmit also uses WEBDAVFS 1.x.x but crashes
             // with SC_CREATED response
             LOG.trace("DoPut.execute() : do workaround for user agent '"
-                    + _userAgent + "'");
+                    + userAgent + "'");
             resp.setStatus(WebdavStatus.SC_NO_CONTENT);
         } else {
             resp.setStatus(WebdavStatus.SC_CREATED);

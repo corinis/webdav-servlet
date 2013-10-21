@@ -52,16 +52,18 @@ public class DoLock extends AbstractMethod {
     private final IResourceLocks _resourceLocks;
     private final boolean _readOnly;
 
-    private boolean _macLockRequest = false;
-
-    private boolean _exclusive = false;
-    private String _type = null;
-    private String _lockOwner = null;
-
-    private String _path = null;
-    private String _parentPath = null;
-
-    private String _userAgent = null;
+    /**
+     * Wrap mutable fields in order to provide thread-safety
+     */
+    private static final class State {
+        private boolean _macLockRequest = false;
+        private boolean _exclusive = false;
+        private String _type = null;
+        private String _lockOwner = null;
+        private String _path = null;
+        private String _parentPath = null;
+        private String _userAgent = null;
+    }
 
     public DoLock(IWebdavStore store, ILockingListener lockingListener,
             IResourceLocks resourceLocks, boolean readOnly) {
@@ -76,21 +78,21 @@ public class DoLock extends AbstractMethod {
             HttpServletResponse resp) throws IOException, LockFailedException {
         LOG.trace("-- " + this.getClass().getName());
 
+        State state = new State();
+
         if (_readOnly) {
             resp.sendError(WebdavStatus.SC_FORBIDDEN);
             return;
         } else {
-            _path = getRelativePath(req);
-            _parentPath = getParentPath(getCleanPath(_path));
+            state._path = getRelativePath(req);
+            state._parentPath = getParentPath(getCleanPath(state._path));
 
-            Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
-
-            if (!checkLocks(transaction, req, resp, _resourceLocks, _path)) {
+            if (!checkLocks(transaction, req, resp, _resourceLocks, state._path)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);
                 return; // resource is locked
             }
 
-            if (!checkLocks(transaction, req, resp, _resourceLocks, _parentPath)) {
+            if (!checkLocks(transaction, req, resp, _resourceLocks, state._parentPath)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);
                 return; // parent is locked
             }
@@ -98,76 +100,76 @@ public class DoLock extends AbstractMethod {
             // Mac OS Finder (whether 10.4.x or 10.5) can't store files
             // because executing a LOCK without lock information causes a
             // SC_BAD_REQUEST
-            _userAgent = req.getHeader("User-Agent");
-            if (_userAgent != null && _userAgent.indexOf("Darwin") != -1) {
-                _macLockRequest = true;
+            state._userAgent = req.getHeader("User-Agent");
+            if (state._userAgent != null && state._userAgent.indexOf("Darwin") != -1) {
+                state._macLockRequest = true;
 
                 String timeString = Long.toString(System.currentTimeMillis());
-                _lockOwner = _userAgent.concat(timeString);
+                state._lockOwner = state._userAgent.concat(timeString);
             }
 
             String tempLockOwner = "doLock" + System.currentTimeMillis()
                     + req.toString();
-            if (_resourceLocks.lock(transaction, _path, tempLockOwner, false,
+            if (_resourceLocks.lock(transaction, state._path, tempLockOwner, false,
                     0, TEMP_TIMEOUT, TEMPORARY)) {
                 try {
                     if (req.getHeader("If") != null) {
-                        doRefreshLock(transaction, req, resp);
+                        doRefreshLock(transaction, req, resp, state);
                     } else {
-                        doLock(transaction, req, resp);
+                        doLock(transaction, req, resp, state);
                     }
                 } catch (LockFailedException e) {
                     resp.sendError(WebdavStatus.SC_LOCKED);
                     LOG.error("Lockfailed exception", e);
                 } finally {
                     _resourceLocks.unlockTemporaryLockedObjects(transaction,
-                            _path, tempLockOwner);
+                            state._path, tempLockOwner);
                 }
             }
         }
     }
 
     private void doLock(ITransaction transaction, HttpServletRequest req,
-            HttpServletResponse resp) throws IOException, LockFailedException {
+                        HttpServletResponse resp, State state) throws IOException, LockFailedException {
 
-        StoredObject so = _store.getStoredObject(transaction, _path);
+        StoredObject so = _store.getStoredObject(transaction, state._path);
 
         if (so != null) {
-            doLocking(transaction, req, resp);
+            doLocking(transaction, req, resp, state);
         } else {
             // resource doesn't exist, null-resource lock
-            doNullResourceLock(transaction, req, resp);
+            doNullResourceLock(transaction, req, resp, state);
         }
 
         so = null;
-        _exclusive = false;
-        _type = null;
-        _lockOwner = null;
+        state._exclusive = false;
+        state._type = null;
+        state._lockOwner = null;
 
     }
 
     private void doLocking(ITransaction transaction, HttpServletRequest req,
-            HttpServletResponse resp) throws IOException {
+                           HttpServletResponse resp, State state) throws IOException {
 
         // Tests if LockObject on requested path exists, and if so, tests
         // exclusivity
         LockedObject lo = _resourceLocks.getLockedObjectByPath(transaction,
-                _path);
+                state._path);
         if (lo != null) {
             if (lo.isExclusive()) {
-                sendLockFailError(transaction, req, resp);
+                sendLockFailError(transaction, req, resp, state);
                 return;
             }
         }
         try {
             // Thats the locking itself
-            executeLock(transaction, req, resp);
+            executeLock(transaction, req, resp, state);
 
         } catch (ServletException e) {
             resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
             LOG.trace(e.toString());
         } catch (LockFailedException e) {
-            sendLockFailError(transaction, req, resp);
+            sendLockFailError(transaction, req, resp, state);
         } finally {
             lo = null;
         }
@@ -175,17 +177,17 @@ public class DoLock extends AbstractMethod {
     }
 
     private void doNullResourceLock(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp)
+                                    HttpServletRequest req, HttpServletResponse resp, State state)
             throws IOException {
 
         StoredObject parentSo, nullSo = null;
 
         try {
-            parentSo = _store.getStoredObject(transaction, _parentPath);
+            parentSo = _store.getStoredObject(transaction, state._parentPath);
 
-            if(_parentPath != null){
+            if(state._parentPath != null){
                 if(parentSo == null){
-                    _store.createFolder(transaction, _parentPath);
+                    _store.createFolder(transaction, state._parentPath);
                 }else if(parentSo.isResource()){
                     resp.sendError(WebdavStatus.SC_PRECONDITION_FAILED);
                                     return;
@@ -193,16 +195,16 @@ public class DoLock extends AbstractMethod {
             }
 
 
-            nullSo = _store.getStoredObject(transaction, _path);
+            nullSo = _store.getStoredObject(transaction, state._path);
             if (nullSo == null) {
                 // resource doesn't exist
-                _store.createResource(transaction, _path);
+                _store.createResource(transaction, state._path);
 
                 // Transmit expects 204 response-code, not 201
-                if (_userAgent != null && _userAgent.contains("Transmit")) {
+                if (state._userAgent != null && state._userAgent.contains("Transmit")) {
                     LOG
                             .trace("DoLock.execute() : do workaround for user agent '"
-                                    + _userAgent + "'");
+                                    + state._userAgent + "'");
                     resp.setStatus(WebdavStatus.SC_NO_CONTENT);
                 } else {
                     resp.setStatus(WebdavStatus.SC_CREATED);
@@ -210,18 +212,18 @@ public class DoLock extends AbstractMethod {
 
             } else {
                 // resource already exists, could not execute null-resource lock
-                sendLockFailError(transaction, req, resp);
+                sendLockFailError(transaction, req, resp, state);
                 return;
             }
-            nullSo = _store.getStoredObject(transaction, _path);
+            nullSo = _store.getStoredObject(transaction, state._path);
             // define the newly created resource as null-resource
             nullSo.setNullResource(true);
 
             // Thats the locking itself
-            executeLock(transaction, req, resp);
+            executeLock(transaction, req, resp, state);
 
         } catch (LockFailedException e) {
-            sendLockFailError(transaction, req, resp);
+            sendLockFailError(transaction, req, resp, state);
         } catch (WebdavException e) {
             resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
             LOG.error("Webdav exception", e);
@@ -235,7 +237,7 @@ public class DoLock extends AbstractMethod {
     }
 
     private void doRefreshLock(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp)
+                               HttpServletRequest req, HttpServletResponse resp, State state)
             throws IOException, LockFailedException {
 
         String[] lockTokens = getLockIdFromIfHeader(req);
@@ -252,7 +254,7 @@ public class DoLock extends AbstractMethod {
 
                 refreshLo.refreshTimeout(timeout);
                 // sending success response
-                generateXMLReport(transaction, resp, refreshLo);
+                generateXMLReport(transaction, resp, refreshLo, state);
 
                 refreshLo = null;
             } else {
@@ -271,41 +273,41 @@ public class DoLock extends AbstractMethod {
      * Executes the LOCK
      */
     private void executeLock(ITransaction transaction, HttpServletRequest req,
-            HttpServletResponse resp) throws LockFailedException, IOException,
+                             HttpServletResponse resp, State state) throws LockFailedException, IOException,
             ServletException {
 
         // Mac OS lock request workaround
-        if (_macLockRequest) {
+        if (state._macLockRequest) {
             LOG.trace("DoLock.execute() : do workaround for user agent '"
-                    + _userAgent + "'");
+                    + state._userAgent + "'");
 
-            doMacLockRequestWorkaround(transaction, req, resp);
+            doMacLockRequestWorkaround(transaction, req, resp, state);
         } else {
             // Getting LockInformation from request
-            if (getLockInformation(transaction, req, resp)) {
+            if (getLockInformation(transaction, req, resp, state)) {
                 int depth = getDepth(req);
                 int lockDuration = getTimeout(transaction, req);
 
                 boolean lockSuccess = false;
-                if (_exclusive) {
+                if (state._exclusive) {
                     lockSuccess = _resourceLocks.exclusiveLock(transaction,
-                            _path, _lockOwner, depth, lockDuration);
+                            state._path, state._lockOwner, depth, lockDuration);
                 } else {
-                    lockSuccess = _resourceLocks.sharedLock(transaction, _path,
-                            _lockOwner, depth, lockDuration);
+                    lockSuccess = _resourceLocks.sharedLock(transaction, state._path,
+                            state._lockOwner, depth, lockDuration);
                 }
 
                 if (lockSuccess) {
                     // Locks successfully placed - return information about
                     LockedObject lo = _resourceLocks.getLockedObjectByPath(
-                            transaction, _path);
+                            transaction, state._path);
                     if (lo != null) {
-                        generateXMLReport(transaction, resp, lo);
+                        generateXMLReport(transaction, resp, lo, state);
                     } else {
                         resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
                     }
                 } else {
-                    sendLockFailError(transaction, req, resp);
+                    sendLockFailError(transaction, req, resp, state);
 
                     throw new LockFailedException();
                 }
@@ -321,7 +323,7 @@ public class DoLock extends AbstractMethod {
      * Tries to get the LockInformation from LOCK request
      */
     private boolean getLockInformation(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp)
+                                       HttpServletRequest req, HttpServletResponse resp, State state)
             throws ServletException, IOException {
 
         Node lockInfoNode = null;
@@ -378,9 +380,9 @@ public class DoLock extends AbstractMethod {
                             scope = currentNode.getNodeName();
 
                             if (scope.endsWith("exclusive")) {
-                                _exclusive = true;
+                                state._exclusive = true;
                             } else if (scope.equals("shared")) {
-                                _exclusive = false;
+                                state._exclusive = false;
                             }
                         }
                     }
@@ -398,16 +400,16 @@ public class DoLock extends AbstractMethod {
                         currentNode = childList.item(i);
 
                         if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
-                            _type = currentNode.getNodeName();
+                            state._type = currentNode.getNodeName();
 
-                            if (_type.endsWith("write")) {
-                                _type = "write";
-                            } else if (_type.equals("read")) {
-                                _type = "read";
+                            if (state._type.endsWith("write")) {
+                                state._type = "write";
+                            } else if (state._type.equals("read")) {
+                                state._type = "read";
                             }
                         }
                     }
-                    if (_type == null) {
+                    if (state._type == null) {
                         return false;
                     }
                 } else {
@@ -421,15 +423,15 @@ public class DoLock extends AbstractMethod {
 
                         if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
                                                         // word 2010+
-							_lockOwner = currentNode.getFirstChild()
+                            state._lockOwner = currentNode.getFirstChild()
 									.getNodeValue();
                         } else if (currentNode.getNodeType() == Node.TEXT_NODE) {
                             // word 2007
-                            _lockOwner = currentNode.getNodeValue();
+                            state._lockOwner = currentNode.getNodeValue();
                         }
                     }
                 }
-                if (_lockOwner == null) {
+                if (state._lockOwner == null) {
                     return false;
                 }
             } else {
@@ -492,7 +494,7 @@ public class DoLock extends AbstractMethod {
      * Generates the response XML with all lock information
      */
     private void generateXMLReport(ITransaction transaction,
-            HttpServletResponse resp, LockedObject lo) throws IOException {
+                                   HttpServletResponse resp, LockedObject lo, State state) throws IOException {
 
         HashMap<String, String> namespaces = new HashMap<String, String>();
         namespaces.put("DAV:", "D");
@@ -507,11 +509,11 @@ public class DoLock extends AbstractMethod {
         generatedXML.writeElement("DAV::activelock", XMLWriter.OPENING);
 
         generatedXML.writeElement("DAV::locktype", XMLWriter.OPENING);
-        generatedXML.writeProperty("DAV::" + _type);
+        generatedXML.writeProperty("DAV::" + state._type);
         generatedXML.writeElement("DAV::locktype", XMLWriter.CLOSING);
 
         generatedXML.writeElement("DAV::lockscope", XMLWriter.OPENING);
-        if (_exclusive) {
+        if (state._exclusive) {
             generatedXML.writeProperty("DAV::exclusive");
         } else {
             generatedXML.writeProperty("DAV::shared");
@@ -531,7 +533,7 @@ public class DoLock extends AbstractMethod {
         generatedXML.writeElement("DAV::owner", XMLWriter.OPENING);
         // valid code, but word 2007 can't handle it
         //generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
-        generatedXML.writeText(_lockOwner);
+        generatedXML.writeText(state._lockOwner);
         //generatedXML.writeElement("DAV::href", XMLWriter.CLOSING);
         generatedXML.writeElement("DAV::owner", XMLWriter.CLOSING);
 
@@ -561,7 +563,7 @@ public class DoLock extends AbstractMethod {
      * Executes the lock for a Mac OS Finder client
      */
     private void doMacLockRequestWorkaround(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp)
+                                            HttpServletRequest req, HttpServletResponse resp, State state)
             throws LockFailedException, IOException {
         LockedObject lo;
         int depth = getDepth(req);
@@ -569,21 +571,20 @@ public class DoLock extends AbstractMethod {
         if (lockDuration < 0 || lockDuration > MAX_TIMEOUT)
             lockDuration = DEFAULT_TIMEOUT;
 
-        boolean lockSuccess = false;
-        lockSuccess = _resourceLocks.exclusiveLock(transaction, _path,
-                _lockOwner, depth, lockDuration);
+        boolean lockSuccess = _resourceLocks.exclusiveLock(transaction, state._path,
+                state._lockOwner, depth, lockDuration);
 
         if (lockSuccess) {
             // Locks successfully placed - return information about
-            lo = _resourceLocks.getLockedObjectByPath(transaction, _path);
+            lo = _resourceLocks.getLockedObjectByPath(transaction, state._path);
             if (lo != null) {
-                generateXMLReport(transaction, resp, lo);
+                generateXMLReport(transaction, resp, lo, state);
             } else {
                 resp.sendError(WebdavStatus.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
             // Locking was not successful
-            sendLockFailError(transaction, req, resp);
+            sendLockFailError(transaction, req, resp, state);
         }
     }
 
@@ -591,10 +592,10 @@ public class DoLock extends AbstractMethod {
      * Sends an error report to the client
      */
     private void sendLockFailError(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp)
+                                   HttpServletRequest req, HttpServletResponse resp, State state)
             throws IOException {
         Hashtable<String, Integer> errorList = new Hashtable<String, Integer>();
-        errorList.put(_path, WebdavStatus.SC_LOCKED);
+        errorList.put(state._path, WebdavStatus.SC_LOCKED);
         sendReport(req, resp, errorList);
     }
 
