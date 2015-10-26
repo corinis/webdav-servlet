@@ -15,9 +15,6 @@
  */
 package net.sf.webdav;
 
-import net.sf.webdav.exceptions.WebdavException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -29,7 +26,12 @@ import java.io.OutputStream;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import net.sf.webdav.exceptions.WebdavException;
 
 /**
  * Reference Implementation of WebdavStore
@@ -45,6 +47,8 @@ public class LocalFileSystemStore implements IWebdavStore {
     private static int BUF_SIZE = 65536;
 
     private File _root = null;
+    
+    private static DavExtensionConfig config = new DavExtensionConfig();
 
     public LocalFileSystemStore(File root) {
         _root = root;
@@ -231,4 +235,13 @@ public class LocalFileSystemStore implements IWebdavStore {
     public void moveResource(ITransaction transaction, String sourceUri, String destinationUri) {
         throw new UnsupportedOperationException("Move operation is not supported in the LocalFileSystemStore");
     }
+
+	@Override
+	public DavExtensionConfig getConfig() {
+		return config;
+	}
+
+	@Override
+	public void addNamespace(HashMap<String, String> namespaces) {
+	}
 }

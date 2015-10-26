@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 
+import net.sf.webdav.DavExtensionConfig;
 import net.sf.webdav.IMimeTyper;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
@@ -73,6 +74,7 @@ public class DoPropfind extends AbstractMethod {
     private final IWebdavStore _store;
     private final ResourceLocks _resourceLocks;
     private final IMimeTyper _mimeTyper;
+	private DavExtensionConfig _config;
 
     private int _depth;
 
@@ -81,6 +83,10 @@ public class DoPropfind extends AbstractMethod {
         _store = store;
         _resourceLocks = resLocks;
         _mimeTyper = mimeTyper;
+        _config = store.getConfig();
+        if(_config == null) {
+        	_config = new DavExtensionConfig();
+        }
     }
 
     public void execute(ITransaction transaction, HttpServletRequest req,
@@ -142,6 +148,8 @@ public class DoPropfind extends AbstractMethod {
 
                 HashMap<String, String> namespaces = new HashMap<String, String>();
                 namespaces.put("DAV:", "D");
+                _store.addNamespace(namespaces);
+
 
                 if (propertyFindType == FIND_BY_PROPERTY) {
                     propertyFindType = 0;
@@ -150,6 +158,7 @@ public class DoPropfind extends AbstractMethod {
 
                 resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
                 resp.setContentType("text/xml; charset=UTF-8");
+                resp.addHeader("DAV", _config.getDavHeader());
 
                 // Create multistatus object
                 XMLWriter generatedXML = new XMLWriter(resp.getWriter(),
@@ -261,6 +270,7 @@ public class DoPropfind extends AbstractMethod {
         // ResourceInfo resourceInfo = new ResourceInfo(path, resources);
 
         generatedXML.writeElement("DAV::response", XMLWriter.OPENING);
+        
         String status = new String("HTTP/1.1 " + WebdavStatus.SC_OK + " "
                 + WebdavStatus.getStatusText(WebdavStatus.SC_OK));
 
@@ -320,6 +330,12 @@ public class DoPropfind extends AbstractMethod {
                         XMLWriter.OPENING);
                 generatedXML.writeElement("DAV::collection",
                         XMLWriter.NO_CONTENT);
+                if(so.getResourceTypes() != null) {
+                	for(String s: so.getResourceTypes()) {
+                        generatedXML.writeElement(s,
+                                XMLWriter.NO_CONTENT);
+                	}
+                }
                 generatedXML.writeElement("DAV::resourcetype",
                         XMLWriter.CLOSING);
             }
@@ -434,6 +450,13 @@ public class DoPropfind extends AbstractMethod {
                                 XMLWriter.OPENING);
                         generatedXML.writeElement("DAV::collection",
                                 XMLWriter.NO_CONTENT);
+                        if(so.getResourceTypes() != null) {
+                        	for(String s: so.getResourceTypes()) {
+                                generatedXML.writeElement(s,
+                                        XMLWriter.NO_CONTENT);
+                        	}
+                        }
+
                         generatedXML.writeElement("DAV::resourcetype",
                                 XMLWriter.CLOSING);
                     } else {
@@ -450,10 +473,32 @@ public class DoPropfind extends AbstractMethod {
 
                     writeLockDiscoveryElements(transaction, generatedXML, path);
 
+                } else if(property.equals("DAV::supported-report-set")){
+                    generatedXML.writeElement("DAV::supported-report-set",
+                            XMLWriter.OPENING);
+                    for(String s : _config.getSupportedReportSets()) {
+                    	generatedXML.writeElement("DAV::supported-report", XMLWriter.OPENING);
+                    	generatedXML.writeElement("DAV::report", XMLWriter.OPENING);
+                    		generatedXML.writeElement(s, XMLWriter.NO_CONTENT);
+                    	generatedXML.writeElement("DAV::report", XMLWriter.CLOSING);
+                    	generatedXML.writeElement("DAV::supported-report", XMLWriter.CLOSING);
+                    }
+                    generatedXML.writeElement("DAV::supported-report-set",
+                            XMLWriter.CLOSING);
+
                 } else {
                     propertiesNotFound.addElement(property);
                 }
 
+            }
+            
+            // special case: found none of the properties - write directly
+            if(propertiesNotFound.size() == propertiesVector.size()) {
+                status = new String("HTTP/1.1 " + WebdavStatus.SC_NOT_FOUND
+                        + " "
+                        + WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND));
+                writePropertiesNotFound(generatedXML, propertiesNotFound);
+                propertiesNotFound.clear();
             }
 
             generatedXML.writeElement("DAV::prop", XMLWriter.CLOSING);
@@ -462,30 +507,22 @@ public class DoPropfind extends AbstractMethod {
             generatedXML.writeElement("DAV::status", XMLWriter.CLOSING);
             generatedXML.writeElement("DAV::propstat", XMLWriter.CLOSING);
 
-            Enumeration<String> propertiesNotFoundList = propertiesNotFound
-                    .elements();
-
-            if (propertiesNotFoundList.hasMoreElements()) {
-
+            // write remaining missing properties
+            if (!propertiesNotFound.isEmpty()) {
                 status = new String("HTTP/1.1 " + WebdavStatus.SC_NOT_FOUND
                         + " "
                         + WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND));
-
+                
                 generatedXML.writeElement("DAV::propstat", XMLWriter.OPENING);
                 generatedXML.writeElement("DAV::prop", XMLWriter.OPENING);
-
-                while (propertiesNotFoundList.hasMoreElements()) {
-                    generatedXML.writeElement((String) propertiesNotFoundList
-                            .nextElement(), XMLWriter.NO_CONTENT);
-                }
-
+                writePropertiesNotFound(generatedXML, propertiesNotFound);
                 generatedXML.writeElement("DAV::prop", XMLWriter.CLOSING);
                 generatedXML.writeElement("DAV::status", XMLWriter.OPENING);
-                generatedXML.writeText(status);
+                generatedXML.writeText(status.toString());
                 generatedXML.writeElement("DAV::status", XMLWriter.CLOSING);
                 generatedXML.writeElement("DAV::propstat", XMLWriter.CLOSING);
-
             }
+
 
             break;
 
@@ -496,6 +533,19 @@ public class DoPropfind extends AbstractMethod {
         so = null;
     }
 
+    private void writePropertiesNotFound(XMLWriter generatedXML, Vector<String> propertiesNotFound) {
+    	Enumeration<String> propertiesNotFoundList = propertiesNotFound
+                .elements();
+
+
+        while (propertiesNotFoundList.hasMoreElements()) {
+            generatedXML.writeElement((String) propertiesNotFoundList
+                    .nextElement(), XMLWriter.NO_CONTENT);
+        }
+
+        
+    }
+    
     private void writeSupportedLockElements(ITransaction transaction,
             XMLWriter generatedXML, String path) {
 

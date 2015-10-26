@@ -19,7 +19,9 @@
 
 package net.sf.webdav;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class StoredObject {
 
@@ -30,6 +32,9 @@ public class StoredObject {
     private String  mimeType;
 
     private boolean isNullRessource;
+    
+    private List<String> resourceTypes = new ArrayList<String>();
+	private String etag;
 
     /**
      * Determines whether the StoredObject is a folder or a resource
@@ -161,5 +166,22 @@ public class StoredObject {
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
+
+	public List<String> getResourceTypes() {
+		return resourceTypes;
+	}
+
+	public void setResourceTypes(List<String> resourceTypes) {
+		this.resourceTypes = resourceTypes;
+	}
+
+	public String getEtag() {
+		return etag;
+	}
+
+	public void setEtag(String etag) {
+		this.etag = etag;
+	}
+
 
 }

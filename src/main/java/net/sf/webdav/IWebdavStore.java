@@ -23,11 +23,13 @@
 
 package net.sf.webdav;
 
-import net.sf.webdav.exceptions.WebdavException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.security.Principal;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
+
+import net.sf.webdav.exceptions.WebdavException;
 
 /**
  * Interface for simple implementation of any store for the WebdavServlet
@@ -236,4 +238,8 @@ public interface IWebdavStore {
     boolean supportsMoveOperation();
 
     void moveResource(ITransaction transaction, String sourceUri, String destinationUri);
+    
+    DavExtensionConfig getConfig();
+
+	void addNamespace(HashMap<String, String> namespaces);
 }

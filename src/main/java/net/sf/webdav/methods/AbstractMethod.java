@@ -258,6 +258,10 @@ public abstract class AbstractMethod implements IMethodExecutor {
      */
     protected String getETag(StoredObject so) {
 
+    	String et = so.getEtag();
+    	if(et != null)
+    		return et;
+    	
         String resourceLength = "";
         String lastModified = "";
 
