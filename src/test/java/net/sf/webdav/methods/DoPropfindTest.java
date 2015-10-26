@@ -47,6 +47,12 @@ public class DoPropfindTest extends MockTest {
 
                 StoredObject rootSo = initFolderStoredObject();
 
+                ignoring(any(IWebdavStore.class)).method("addNamespace");
+                ignoring(any(Object.class)).method("addHeader");
+                
+                oneOf(mockStore).getConfig();
+                will(returnValue(new DavExtensionConfig()));
+                
                 oneOf(mockStore).getStoredObject(mockTransaction, path);
                 will(returnValue(rootSo));
 
@@ -137,6 +143,12 @@ public class DoPropfindTest extends MockTest {
                 will(returnValue("0"));
 
                 StoredObject fileSo = initFolderStoredObject();
+
+                ignoring(any(IWebdavStore.class)).method("addNamespace");
+                ignoring(any(Object.class)).method("addHeader");
+                
+                oneOf(mockStore).getConfig();
+                will(returnValue(new DavExtensionConfig()));
 
                 oneOf(mockStore).getStoredObject(mockTransaction, path);
                 will(returnValue(fileSo));

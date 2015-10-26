@@ -74,7 +74,6 @@ public class DoPropfind extends AbstractMethod {
     private final IWebdavStore _store;
     private final ResourceLocks _resourceLocks;
     private final IMimeTyper _mimeTyper;
-	private DavExtensionConfig _config;
 
     private int _depth;
 
@@ -83,10 +82,6 @@ public class DoPropfind extends AbstractMethod {
         _store = store;
         _resourceLocks = resLocks;
         _mimeTyper = mimeTyper;
-        _config = store.getConfig();
-        if(_config == null) {
-        	_config = new DavExtensionConfig();
-        }
     }
 
     public void execute(ITransaction transaction, HttpServletRequest req,
@@ -158,7 +153,7 @@ public class DoPropfind extends AbstractMethod {
 
                 resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
                 resp.setContentType("text/xml; charset=UTF-8");
-                resp.addHeader("DAV", _config.getDavHeader());
+                resp.addHeader("DAV", _store.getConfig().getDavHeader());
 
                 // Create multistatus object
                 XMLWriter generatedXML = new XMLWriter(resp.getWriter(),
@@ -476,7 +471,7 @@ public class DoPropfind extends AbstractMethod {
                 } else if(property.equals("DAV::supported-report-set")){
                     generatedXML.writeElement("DAV::supported-report-set",
                             XMLWriter.OPENING);
-                    for(String s : _config.getSupportedReportSets()) {
+                    for(String s : _store.getConfig().getSupportedReportSets()) {
                     	generatedXML.writeElement("DAV::supported-report", XMLWriter.OPENING);
                     	generatedXML.writeElement("DAV::report", XMLWriter.OPENING);
                     		generatedXML.writeElement(s, XMLWriter.NO_CONTENT);
