@@ -159,14 +159,13 @@ you want to store your vcards in your web.xml:
 
 This has been tested with:
 
-* (Thunderbird)[https://www.mozilla.org/thunderbird/] and the (Sogo Connector 31.0.1)[http://www.sogo.nu/downloads/frontends.html]
+* [Thunderbird](https://www.mozilla.org/thunderbird/) and the [Sogo Connector 31.0.1](http://www.sogo.nu/downloads/frontends.html)
 
 # CREDITS
 
-We want to thank Remy Maucherat for the original webdav-servlet
-and the dependent files that come with tomcat,
-and Oliver Zeigermann for the slide-WCK. Our IWebdavStorage class is modeled
-after his BasicWebdavStore.
+* Remy Maucherat for the original webdav-servlet 
+* the dependent files that come with tomcat,
+* Oliver Zeigermann for the slide-WCK. Our IWebdavStorage class is modeled after his BasicWebdavStore.
  
  
-the original project homepage is at http://sourceforge.net/projects/webdav-servlet/
+[original project homepage](http://sourceforge.net/projects/webdav-servlet/)
