@@ -114,17 +114,18 @@ from windows(2000 and XP) and MAC
 
 ## CARDDAV
 
-Carddav is an extension to the default webdav protocol for storeing contact information
+Carddav is an extension to the default webdav protocol for storing contact information
 as "vcard". The sample implementation allows for that by storing the information 
 received onto the file system. 
 
 Note: This is not a full sync solution, but rather a simple proof of concept. It will
 allow you to our of the box sync the contacts of i.e. 2 computers running thunderbird.
-But it does not extra error checking or resolution like:
+
+Because of the simple core code, it will probably not work correctly if:
 
 - if 2 computers change the same file
 - multi user support
-- client specific usage of certain fields (i.e. one client supports images, the other one does not)
+- clients use of different fields (i.e. one client supports images, the other one does not)
 
 ### Configuration
 
