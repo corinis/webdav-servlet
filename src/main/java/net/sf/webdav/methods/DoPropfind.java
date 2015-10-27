@@ -258,6 +258,9 @@ public class DoPropfind extends AbstractMethod {
         StoredObject so = _store.getStoredObject(transaction, path);
 
         boolean isFolder = so.isFolder();
+        if(!so.isFolder()) {
+        	mimeType = so.getMimeType();
+        }
         final String creationdate = creationDateFormat(so.getCreationDate());
         final String lastModified = lastModifiedDateFormat(so.getLastModified());
         String resourceLength = String.valueOf(so.getResourceLength());
@@ -317,7 +320,7 @@ public class DoPropfind extends AbstractMethod {
                     generatedXML.writeProperty("DAV::getcontenttype",
                             contentType);
                 }
-                generatedXML.writeProperty("DAV::getetag", getETag(so));
+                generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
                 generatedXML.writeElement("DAV::resourcetype",
                         XMLWriter.NO_CONTENT);
             } else {
@@ -430,7 +433,7 @@ public class DoPropfind extends AbstractMethod {
                     if (isFolder || so.isNullResource()) {
                         propertiesNotFound.addElement(property);
                     } else {
-                        generatedXML.writeProperty("DAV::getetag", getETag(so));
+                        generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
                     }
                 } else if (property.equals("DAV::getlastmodified")) {
                     if (isFolder) {

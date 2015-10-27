@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.sf.webdav.DavExtensionConfig;
 import net.sf.webdav.IMethodExecutor;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.StoredObject;
@@ -256,7 +257,7 @@ public abstract class AbstractMethod implements IMethodExecutor {
      *      StoredObject
      * @return the ETag
      */
-    protected String getETag(StoredObject so) {
+    protected String getETag(StoredObject so, int format) {
 
     	String et = so.getEtag();
     	if(et != null)
@@ -270,7 +271,10 @@ public abstract class AbstractMethod implements IMethodExecutor {
             lastModified = new Long(so.getLastModified().getTime()).toString();
         }
 
-        return "W/\"" + resourceLength + "-" + lastModified + "\"";
+        if (format == DavExtensionConfig.ETAG_W)
+        	return "W/\"" + resourceLength + "-" + lastModified + "\"";
+        else
+        	return "\"" + resourceLength + "-" + lastModified + "\"";
 
     }
 

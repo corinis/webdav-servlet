@@ -3,10 +3,20 @@ package net.sf.webdav;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Extension config class allowing extra header and report sets to be added
+ * to propfind calls.  
+ * @author Niko Berger
+ *
+ */
 public class DavExtensionConfig {
+	
+	public static final int ETAG_DEFAULT = 0;
+	public static final int ETAG_W = 1;
 	
 	private String davHeader = "1";
 	private List<String> supportedReportSets = new ArrayList<String>();
+	private int etagFormat = ETAG_W;
 	
 	public DavExtensionConfig() {
 	}
@@ -41,4 +51,12 @@ public class DavExtensionConfig {
 		return supportedReportSets;
 	}
 
+	public int getEtagFormat() {
+		return etagFormat ;
+	}
+
+
+	public void setEtagFormat(int etagFormat) {
+		this.etagFormat = etagFormat;
+	}
 }

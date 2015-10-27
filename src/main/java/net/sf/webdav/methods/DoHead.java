@@ -105,7 +105,7 @@ public class DoHead extends AbstractMethod {
 
                     String eTagMatch = req.getHeader("If-None-Match");
                     if (eTagMatch != null) {
-                        if (eTagMatch.equals(getETag(so))) {
+                        if (eTagMatch.equals(getETag(so, _store.getConfig().getEtagFormat()))) {
                             resp.setStatus(WebdavStatus.SC_NOT_MODIFIED);
                             return;
                         }
@@ -122,7 +122,7 @@ public class DoHead extends AbstractMethod {
                             long lastModified = so.getLastModified().getTime();
                             resp.setDateHeader("last-modified", lastModified);
 
-                            String eTag = getETag(so);
+                            String eTag = getETag(so, _store.getConfig().getEtagFormat());
                             resp.addHeader("ETag", eTag);
 
                             long resourceLength = so.getResourceLength();

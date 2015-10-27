@@ -73,8 +73,8 @@ public class WebDavServletBean extends HttpServlet {
             @Override
 			public String getMimeType(ITransaction transaction, String path) {
                 String retVal= _store.getStoredObject(transaction, path).getMimeType();
-                if ( retVal== null) {
-                    retVal= getServletContext().getMimeType( path);
+                if ( retVal == null) {
+                    retVal = getServletContext().getMimeType( path);
                 }
                 return retVal;
             }
