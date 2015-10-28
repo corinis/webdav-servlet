@@ -3,15 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>WebDAV servlet</name>
-    <groupId>com.iviews.external</groupId>
+    <groupId>com.corinis.external</groupId>
     <artifactId>webdav-servlet</artifactId>
-    <version>2.0.7-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
     <inceptionYear>2011</inceptionYear>
-    <description>Modified version of the net.sf.webdav-servlet:webdav-servlet imported from github (ifunsoftware)</description>
+    <description>Modified version of the net.sf.webdav-servlet:webdav-servlet imported from github (ifunsoftware)
+Extended with webdav extension from https://github.com/iviews/webdav-servlet (http://www.i-views.de/)</description>
 
     <scm>
-        <connection>scm:git:https://github.com/nknapp/webdav-servlet.git</connection>
-        <url>https://github.com/nknapp/webdav-servlet</url>
+        <connection>scm:git:https://github.com/corinis/webdav-servlet.git</connection>
+        <url>https://github.com/corinis/webdav-servlet</url>
     </scm>
 
     <properties>

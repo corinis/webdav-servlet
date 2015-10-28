@@ -18,6 +18,24 @@ data access options. versioning or user management are not supported
 
 # INSTALLATION & CONFIGURATION
 
+When used with a maven project, clone the repo and install it with maven:
+ 
+```
+git clone https://github.com/corinis/webdav-servlet.git
+cd webdav-servlet
+mvn install
+```
+
+Then in your project add the dependency:
+```xml
+<dependency>
+	<groupId>com.corinis.external</groupId>
+	<artifactId>webdav-servlet</artifactId>
+	<version>2.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+
 This is for Apache Tomcat:
 
 - place the webdav-servlet.jar in the /WEB-INF/lib/ of your webapp
