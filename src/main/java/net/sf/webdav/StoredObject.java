@@ -182,6 +182,4 @@ public class StoredObject {
 	public void setEtag(String etag) {
 		this.etag = etag;
 	}
-
-
 }

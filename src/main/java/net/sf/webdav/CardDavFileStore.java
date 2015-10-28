@@ -28,11 +28,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -56,6 +60,10 @@ public class CardDavFileStore implements IWebdavStore {
 
     private static int BUF_SIZE = 65536;
     
+    private static String ABOOK_BASE = "addressbook";
+    
+    private static String ABOOK_URL = "/" + ABOOK_BASE;
+    
     private File _root = null;
 
 	private DavExtensionConfig config;
@@ -67,6 +75,7 @@ public class CardDavFileStore implements IWebdavStore {
 		config = new DavExtensionConfig();
 		config.setDavHeader("1", "3", "extended-mkcol", "addressbook", "access-control");
 		config.setEtagFormat(DavExtensionConfig.ETAG_DEFAULT);
+		config.setSupportsReport(true);
 		config.addSupportedReportSet(
 				"urn:ietf:params:xml:ns:carddav:addressbook-muliget", 
 				"urn:ietf:params:xml:ns:carddav:addressbook-query", 
@@ -120,7 +129,7 @@ public class CardDavFileStore implements IWebdavStore {
 	@Override
 	public void createResource(ITransaction transaction, String resourceUri) {
         LOG.trace("LocalFileSystemStore.createResource(" + resourceUri + ")");
-        File file = new File(_root, resourceUri);
+        File file = getFile(resourceUri);
         try {
             if (!file.createNewFile())
                 throw new WebdavException("cannot create file: " + resourceUri);
@@ -136,7 +145,7 @@ public class CardDavFileStore implements IWebdavStore {
 	public InputStream getResourceContent(ITransaction transaction,
 			String resourceUri) {
 		LOG.trace("LocalFileSystemStore.getResourceContent(" + resourceUri + ")");
-        File file = new File(_root, resourceUri);
+		File file = getFile(resourceUri);
 
         InputStream in;
         try {
@@ -154,7 +163,7 @@ public class CardDavFileStore implements IWebdavStore {
 			String resourceUri, InputStream content, String contentType,
 			String characterEncoding) {
 		LOG.trace("LocalFileSystemStore.setResourceContent(" + resourceUri + ")");
-        File file = new File(_root, resourceUri);
+        File file = getFile(resourceUri);
         try {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(
                     file), BUF_SIZE);
@@ -192,7 +201,12 @@ public class CardDavFileStore implements IWebdavStore {
 	@Override
 	public String[] getChildrenNames(ITransaction transaction, String folderUri) {
 		LOG.trace("LocalFileSystemStore.getChildrenNames(" + folderUri + ")");
-        File file = new File(_root, folderUri);
+		// special handling: we need a subcollection with the cards
+		if(folderUri.equals("/")) {
+			return new String[]{ABOOK_BASE};
+		}
+		
+        File file = getFile(folderUri);
         String[] childrenNames = null;
         if (file.isDirectory()) {
             File[] children = file.listFiles();
@@ -209,16 +223,36 @@ public class CardDavFileStore implements IWebdavStore {
         return childrenNames;
 	}
 
+	/**
+	 * prefix-handling for the address-book. 
+	 * @param folderUri the uri 
+	 * @return the normalized uri (without the prefix)
+	 */
+	private String normalize(String folderUri) {
+		if(folderUri.startsWith(ABOOK_URL)) {
+			return folderUri.substring(ABOOK_URL.length());
+		}
+		return folderUri;
+	}
+	
+	private File getFile(String path) {
+		return new File(_root, normalize(path));
+	}
+
 	@Override
 	public long getResourceLength(ITransaction transaction, String path) {
 		LOG.trace("LocalFileSystemStore.getResourceLength(" + path + ")");
-        File file = new File(_root, path);
+		if(path.equals("/")) {
+			return 1;
+		}
+
+        File file = getFile(path);
         return file.length();
 	}
 
 	@Override
 	public void removeObject(ITransaction transaction, String uri) {
-		File file = new File(_root, uri);
+		File file = getFile(uri);
         boolean success = file.delete();
         LOG.trace("LocalFileSystemStore.removeObject(" + uri + ")=" + success);
         if (!success) {
@@ -229,8 +263,16 @@ public class CardDavFileStore implements IWebdavStore {
 	@Override
 	public StoredObject getStoredObject(ITransaction transaction, String uri) {
 		StoredObject so = null;
-
-        File file = new File(_root, uri);
+		if(uri.equals("/")) {
+            so = new StoredObject();
+            so.setFolder(true);
+            so.setLastModified(new Date(_root.lastModified()));
+            so.setCreationDate(new Date(_root.lastModified()));
+            so.setResourceLength(getResourceLength(transaction, uri));
+            return so;
+		}
+		
+        File file = getFile(uri);
         if (file.exists()) {
             so = new StoredObject();
             so.setFolder(file.isDirectory());
@@ -272,6 +314,36 @@ public class CardDavFileStore implements IWebdavStore {
 	@Override
 	public void addNamespace(HashMap<String, String> namespaces) {
 		namespaces.put("urn:ietf:params:xml:ns:carddav", "card");
+	}
+
+	@Override
+	public List<String> getReportSubEntries(String reportAction, String path) {
+		// report with subentries not supported
+		return null;
+	}
+	
+	@Override
+	public Map<String, String> getAdditionalProperties(String path,
+			Vector<String> properties) {
+		
+		File file = getFile(path);
+		Map<String, String> props = new HashMap<String, String>();
+		if(properties != null) {
+        	if(properties.remove("urn:ietf:params:xml:ns:carddav:address-data")) {
+        		if(!file.isDirectory()) {
+        			byte[] bytes;
+					try {
+						bytes = Files.readAllBytes(file.toPath());
+						props.put("urn:ietf:params:xml:ns:carddav:address-data", new String(bytes, Charset.forName("UTF-8")));
+					} catch (IOException e) {
+						// re-add as not found
+						properties.add("urn:ietf:params:xml:ns:carddav:address-data");
+					}
+        		}
+        		
+        	}
+        }
+		return props;
 	}
 
 

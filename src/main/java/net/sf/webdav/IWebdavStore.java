@@ -26,6 +26,9 @@ package net.sf.webdav;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -242,4 +245,21 @@ public interface IWebdavStore {
     DavExtensionConfig getConfig();
 
 	void addNamespace(HashMap<String, String> namespaces);
+
+	/**
+	 * when the webstore supports the REPORT functionality, this returns all sub-paths of
+	 * the given entry (i.e. the versions)
+	 * @param reportAction the name of the report action (i.e. version-tree)
+	 * @param path the path to retrieve additional information for 
+	 * @return a collection of paths to include in the response (absolute paths)
+	 */
+	List<String> getReportSubEntries(String reportAction, String path);
+	
+	/**
+	 * Retrieve additional properties for a given path. 
+	 * @param properties all properties, pick what to support and remove from the vector
+	 * @return a map containing the requested properties
+	 */
+	Map<String, String> getAdditionalProperties(String path, Vector<String> properties);
+
 }

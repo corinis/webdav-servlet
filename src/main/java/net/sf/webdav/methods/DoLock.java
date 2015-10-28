@@ -34,6 +34,7 @@ import net.sf.webdav.exceptions.WebdavException;
 import net.sf.webdav.fromcatalina.XMLWriter;
 import net.sf.webdav.locking.IResourceLocks;
 import net.sf.webdav.locking.LockedObject;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

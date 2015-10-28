@@ -118,6 +118,9 @@ Carddav is an extension to the default webdav protocol for storing contact infor
 as "vcard". The sample implementation allows for that by storing the information 
 received onto the file system. 
 
+The store class is a little more complex with REPORT support and custom namespace 
+extension in order to support more clients. 
+
 Note: This is not a full sync solution, but rather a simple proof of concept. It will
 allow you to our of the box sync the contacts of i.e. 2 computers running thunderbird.
 
@@ -155,12 +158,15 @@ you want to store your vcards in your web.xml:
 
 ```
   "http://<ip/name + port of the server>/<name of the webapp>/<servlet-maping>"
-  for the aboce configuration: http://localhost:8080/carddav/
+  for the above configuration: http://localhost:8080/carddav(
 ```                          
 
 This has been tested with:
 
-* [Thunderbird](https://www.mozilla.org/thunderbird/) and the [Sogo Connector 31.0.1](http://www.sogo.nu/downloads/frontends.html)
+* [Thunderbird](https://www.mozilla.org/thunderbird/) and the [Sogo Connector 31.0.1](http://www.sogo.nu/downloads/frontends.html) (for this to work add the "/addressbook/" after the servlet mapping)
+* [Kontact](https://www.kde.org/applications/office/kontact/) 
+
+Most fields even sync between this clients.
 
 # CREDITS
 

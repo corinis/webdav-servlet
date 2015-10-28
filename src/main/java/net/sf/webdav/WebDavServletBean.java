@@ -1,5 +1,17 @@
 package net.sf.webdav;
 
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.util.Enumeration;
+import java.util.HashMap;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.sf.webdav.exceptions.AccessDeniedException;
 import net.sf.webdav.exceptions.UnauthenticatedException;
 import net.sf.webdav.exceptions.WebdavException;
@@ -17,18 +29,8 @@ import net.sf.webdav.methods.DoOptions;
 import net.sf.webdav.methods.DoPropfind;
 import net.sf.webdav.methods.DoProppatch;
 import net.sf.webdav.methods.DoPut;
+import net.sf.webdav.methods.DoReport;
 import net.sf.webdav.methods.DoUnlock;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.util.Enumeration;
-import java.util.HashMap;
 
 public class WebDavServletBean extends HttpServlet {
 
@@ -97,6 +99,7 @@ public class WebDavServletBean extends HttpServlet {
                 lazyFolderCreationOnPut));
         register("PROPFIND", new DoPropfind(store, _resLocks, mimeTyper));
         register("PROPPATCH", new DoProppatch(store, _resLocks, READ_ONLY));
+        register("REPORT", new DoReport(store, _resLocks));
         register("*NO*IMPL*", new DoNotImplemented(READ_ONLY));
     }
 

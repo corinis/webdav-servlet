@@ -16,8 +16,10 @@
 package net.sf.webdav.methods;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -26,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 
-import net.sf.webdav.IMimeTyper;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
@@ -45,10 +46,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-public class DoPropfind extends AbstractMethod {
+/**
+ * REPORT is part of the versioning extension. (see http://tools.ietf.org/html/rfc3253#section-3.6).
+ * 
+ * Supported is report for a single element or multiple hrefs. The actual type of report is passed to
+ * the store to allow for custom fields to be returned.
+ * 
+ * @author Niko Berger
+ */
+public class DoReport extends AbstractMethod {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory
-            .getLogger(DoPropfind.class);
+            .getLogger(DoReport.class);
 
     /**
      * Array containing the safe characters set.
@@ -69,28 +78,33 @@ public class DoPropfind extends AbstractMethod {
      * PROPFIND - Return property names.
      */
     private static final int FIND_PROPERTY_NAMES = 2;
-
+    
     private final IWebdavStore _store;
     private final ResourceLocks _resourceLocks;
-    private final IMimeTyper _mimeTyper;
 
     private int _depth;
 
-    public DoPropfind(IWebdavStore store, ResourceLocks resLocks,
-            IMimeTyper mimeTyper) {
+    public DoReport(IWebdavStore store, ResourceLocks resLocks) {
         _store = store;
         _resourceLocks = resLocks;
-        _mimeTyper = mimeTyper;
     }
 
     public void execute(ITransaction transaction, HttpServletRequest req,
             HttpServletResponse resp) throws IOException, LockFailedException {
         LOG.trace("-- " + this.getClass().getName());
 
+        // not supported -> show a 404
+        if (!_store.getConfig().isSupportsReport()) {
+        	resp.sendError(WebdavStatus.SC_NOT_FOUND, req
+                    .getRequestURI());
+        	return;
+        }
+        
         // Retrieve the resources
         String path = getCleanPath(getRelativePath(req));
-        String tempLockOwner = "doPropfind" + System.currentTimeMillis()
+        String tempLockOwner = "doReport" + System.currentTimeMillis()
                 + req.toString();
+        // can have a depth 
         _depth = getDepth(req);
 
         if (_resourceLocks.lock(transaction, path, tempLockOwner, false,
@@ -110,6 +124,7 @@ public class DoPropfind extends AbstractMethod {
 
                 int propertyFindType = FIND_ALL_PROP;
                 Node propNode = null;
+                Element rootElement = null;
 
                 if (req.getContentLength() != 0) {
                     DocumentBuilder documentBuilder = getDocumentBuilder();
@@ -117,7 +132,7 @@ public class DoPropfind extends AbstractMethod {
                         Document document = documentBuilder
                                 .parse(new InputSource(req.getInputStream()));
                         // Get the root element of the document
-                        Element rootElement = document.getDocumentElement();
+                        rootElement = document.getDocumentElement();
 
                         propNode = XMLHelper
                                 .findSubElement(rootElement, "prop");
@@ -145,9 +160,39 @@ public class DoPropfind extends AbstractMethod {
 
 
                 if (propertyFindType == FIND_BY_PROPERTY) {
-                    propertyFindType = 0;
                     properties = XMLHelper.getPropertiesFromXML(propNode);
                 } 
+                
+                // collect report paths (firect child of root)
+                List<String> reportPaths = new ArrayList<String>();
+                if(rootElement != null) {
+                	 Node child = rootElement.getFirstChild();
+                	 String relPath = req.getServletContext().getContextPath() + req.getServletPath();
+                	 
+                     while (child != null) {
+                         if ((child.getNodeType() == Node.ELEMENT_NODE)
+                                 && (child.getLocalName().equals("href"))) {
+                        	 // TODO clean up path to allow getting
+                        	 String href = child.getTextContent();
+                        	 
+                        	 if(href.startsWith(relPath)) {
+                        		 href = href.substring(relPath.length());
+                        	 }
+                        			 
+                        	 reportPaths.add(getCleanPath(href));
+                         }
+                         child = child.getNextSibling();
+                     }
+                }
+                // in case we got no direct hrefs -> get report on the path itself
+                if(reportPaths.isEmpty()) {
+                	List<String> subpath = _store.getReportSubEntries(rootElement.getLocalName(), path);
+                	if(subpath != null) {
+                		reportPaths.addAll(subpath);
+                	} else {
+                		reportPaths.add(path);
+                	}
+                }
 
                 resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
                 resp.setContentType("text/xml; charset=UTF-8");
@@ -159,14 +204,14 @@ public class DoPropfind extends AbstractMethod {
                 generatedXML.writeXMLHeader();
                 generatedXML
                         .writeElement("DAV::multistatus", XMLWriter.OPENING);
-                if (_depth == 0) {
-                    parseProperties(transaction, req, generatedXML, path,
-                            propertyFindType, properties, _mimeTyper
-                                    .getMimeType(transaction, path));
-                } else {
-                    recursiveParseProperties(transaction, path, req,
-                            generatedXML, propertyFindType, properties, _depth,
-                            _mimeTyper.getMimeType(transaction, path));
+                for(String curPath : reportPaths) {
+	                if (_depth == 0) {
+	                    parseProperties(transaction, req, generatedXML, curPath,
+	                            propertyFindType, properties);
+	                } else {
+	                    recursiveParseProperties(transaction, curPath, req,
+	                            generatedXML, propertyFindType, properties, _depth);
+	                }
                 }
                 generatedXML
                         .writeElement("DAV::multistatus", XMLWriter.CLOSING);
@@ -208,11 +253,11 @@ public class DoPropfind extends AbstractMethod {
      */
     private void recursiveParseProperties(ITransaction transaction,
             String currentPath, HttpServletRequest req, XMLWriter generatedXML,
-            int propertyFindType, Vector<String> properties, int depth,
-            String mimeType) throws WebdavException {
+            int propertyFindType, Vector<String> properties, int depth
+            ) throws WebdavException {
 
         parseProperties(transaction, req, generatedXML, currentPath,
-                propertyFindType, properties, mimeType);
+                propertyFindType, properties);
 
         if (depth > 0) {
             // no need to get name if depth is already zero
@@ -227,8 +272,7 @@ public class DoPropfind extends AbstractMethod {
                 }
                 newPath += name;
                 recursiveParseProperties(transaction, newPath, req,
-                        generatedXML, propertyFindType, properties, depth - 1,
-                        mimeType);
+                        generatedXML, propertyFindType, properties, depth - 1);
             }
         }
     }
@@ -250,12 +294,13 @@ public class DoPropfind extends AbstractMethod {
      */
     private void parseProperties(ITransaction transaction,
             HttpServletRequest req, XMLWriter generatedXML, String path,
-            int type, Vector<String> propertiesVector, String mimeType)
+            int type, Vector<String> propertiesVector)
             throws WebdavException {
 
         StoredObject so = _store.getStoredObject(transaction, path);
 
         boolean isFolder = so.isFolder();
+        String mimeType = null;
         if(!so.isFolder()) {
         	mimeType = so.getMimeType();
         }
@@ -294,13 +339,12 @@ public class DoPropfind extends AbstractMethod {
 
         String resourceName = path;
         int lastSlash = path.lastIndexOf('/');
-        if (lastSlash != -1) {
+        if (lastSlash != -1)
             resourceName = resourceName.substring(lastSlash + 1);
-        }
 
         switch (type) {
 
-        case FIND_ALL_PROP:
+        case FIND_ALL_PROP: {
 
             generatedXML.writeElement("DAV::propstat", XMLWriter.OPENING);
             generatedXML.writeElement("DAV::prop", XMLWriter.OPENING);
@@ -309,6 +353,9 @@ public class DoPropfind extends AbstractMethod {
             generatedXML.writeElement("DAV::displayname", XMLWriter.OPENING);
             generatedXML.writeData(resourceName);
             generatedXML.writeElement("DAV::displayname", XMLWriter.CLOSING);
+            
+            // retrieve all properties from store
+            
             if (!isFolder) {
                 generatedXML
                         .writeProperty("DAV::getlastmodified", lastModified);
@@ -336,6 +383,18 @@ public class DoPropfind extends AbstractMethod {
                 generatedXML.writeElement("DAV::resourcetype",
                         XMLWriter.CLOSING);
             }
+            
+            // retrieve all extended properties
+            Map<String, String> extendedProps = _store.getAdditionalProperties(path, null);
+            if(extendedProps != null)
+	            for(String key : extendedProps.keySet()) {
+	            	generatedXML.writeElement(key,
+	                        XMLWriter.OPENING);
+	            	String val = extendedProps.get(key);
+	            	generatedXML.writeText(val);
+	            	generatedXML.writeElement(key,
+	                        XMLWriter.CLOSING);
+	            }
 
             writeSupportedLockElements(transaction, generatedXML, path);
 
@@ -347,8 +406,7 @@ public class DoPropfind extends AbstractMethod {
             generatedXML.writeText(status);
             generatedXML.writeElement("DAV::status", XMLWriter.CLOSING);
             generatedXML.writeElement("DAV::propstat", XMLWriter.CLOSING);
-
-            break;
+        } break;
 
         case FIND_PROPERTY_NAMES:
 
@@ -486,8 +544,21 @@ public class DoPropfind extends AbstractMethod {
                 } else {
                     propertiesNotFound.addElement(property);
                 }
-
             }
+            
+            // go through the properties not found
+            // retrieve all extended properties
+            Map<String, String> extendedProps = _store.getAdditionalProperties(path, propertiesNotFound);
+            if(extendedProps != null)
+	            for(String key : extendedProps.keySet()) {
+	            	generatedXML.writeElement(key,
+	                        XMLWriter.OPENING);
+	            	String val = extendedProps.get(key);
+	            	generatedXML.writeText(val);
+	            	generatedXML.writeElement(key,
+	                        XMLWriter.CLOSING);
+	            }
+            
             
             // special case: found none of the properties - write directly
             if(propertiesNotFound.size() == propertiesVector.size()) {

@@ -15,20 +15,24 @@
  */
 package net.sf.webdav.methods;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
 import net.sf.webdav.WebdavStatus;
-import net.sf.webdav.exceptions.*;
+import net.sf.webdav.exceptions.AccessDeniedException;
+import net.sf.webdav.exceptions.LockFailedException;
+import net.sf.webdav.exceptions.ObjectAlreadyExistsException;
+import net.sf.webdav.exceptions.ObjectNotFoundException;
+import net.sf.webdav.exceptions.WebdavException;
 import net.sf.webdav.fromcatalina.RequestUtil;
 import net.sf.webdav.locking.ResourceLocks;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map;
 
 public class DoCopy extends AbstractMethod {
 

@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -243,5 +245,18 @@ public class LocalFileSystemStore implements IWebdavStore {
 
 	@Override
 	public void addNamespace(HashMap<String, String> namespaces) {
+	}
+
+	@Override
+	public List<String> getReportSubEntries(String reportAction, String path) {
+		// report not supported at all
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getAdditionalProperties(String path,
+			Vector<String> properties) {
+		// report not supported at all
+		return null;
 	}
 }

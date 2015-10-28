@@ -17,6 +17,7 @@ public class DavExtensionConfig {
 	private String davHeader = "1";
 	private List<String> supportedReportSets = new ArrayList<String>();
 	private int etagFormat = ETAG_W;
+	private boolean supportsReport = false;
 	
 	public DavExtensionConfig() {
 	}
@@ -59,4 +60,18 @@ public class DavExtensionConfig {
 	public void setEtagFormat(int etagFormat) {
 		this.etagFormat = etagFormat;
 	}
+
+
+	public boolean isSupportsReport() {
+		return supportsReport;
+	}
+
+
+	/**
+	 * @param supportsReport set to true if the "Report" operation is handled
+	 */
+	public void setSupportsReport(boolean supportsReport) {
+		this.supportsReport = supportsReport;
+	}
+
 }
