@@ -33,15 +33,23 @@ import net.sf.webdav.exceptions.WebdavException;
  */
 
 public class WebdavServlet extends WebDavServletBean {
+	
+	private static final long serialVersionUID = 1L;
 
-	private static final String ROOTPATH_PARAMETER = "rootpath";
+	private static final String INIT_PARAM_DEFAULT_INDEX_FILE = "default-index-file";
+	private static final String INIT_PARAM_INSTEAD_OF_404 = "instead-of-404";
+	private static final String INIT_PARAM_LAZY_FOLDER_CREATION_ON_PUT = "lazyFolderCreationOnPut";
+	private static final String INIT_PARAM_NO_CONTENT_LENGTH_HEADERS = "no-content-length-headers";
+	private static final String INIT_PARAM_RESOURCE_HANDLER_IMPL = "ResourceHandlerImplementation";
+	private static final String INIT_PARAM_ROOTPATH = "rootpath";
+	private static final String INIT_PARAM_ROOTPATH_WAR_FILE_ROOT_VALUE = "*WAR-FILE-ROOT*";
 
 	@Override
 	public void init() throws ServletException {
 
 		// Parameters from web.xml
 		String clazzName = getServletConfig().getInitParameter(
-				"ResourceHandlerImplementation");
+				INIT_PARAM_RESOURCE_HANDLER_IMPL);
 		if (clazzName == null || clazzName.equals("")) {
 			clazzName = LocalFileSystemStore.class.getName();
 		}
@@ -50,24 +58,16 @@ public class WebdavServlet extends WebDavServletBean {
 
 		IWebdavStore webdavStore = constructStore(clazzName, root);
 
-		boolean lazyFolderCreationOnPut = getInitParameter("lazyFolderCreationOnPut") != null
-				&& getInitParameter("lazyFolderCreationOnPut").equals("1");
-
-		String dftIndexFile = getInitParameter("default-index-file");
-		String insteadOf404 = getInitParameter("instead-of-404");
-
-		int noContentLengthHeader = getIntInitParameter("no-content-length-headers");
+		boolean lazyFolderCreationOnPut = getBooleanInitParameter(INIT_PARAM_LAZY_FOLDER_CREATION_ON_PUT, false);
+		String dftIndexFile = getInitParameter(INIT_PARAM_DEFAULT_INDEX_FILE);
+		String insteadOf404 = getInitParameter(INIT_PARAM_INSTEAD_OF_404);
+		int noContentLengthHeader = getIntInitParameter(INIT_PARAM_NO_CONTENT_LENGTH_HEADERS, -1);
 
 		// Lock notifications
 		ILockingListener listener = constructLockingListener(getInitParameter("LockingListener"));
 
 		super.init(webdavStore, listener, dftIndexFile, insteadOf404,
 				noContentLengthHeader, lazyFolderCreationOnPut);
-	}
-
-	private int getIntInitParameter(String key) {
-		return getInitParameter(key) == null ? -1 : Integer
-				.parseInt(getInitParameter(key));
 	}
 
 	protected IWebdavStore constructStore(String clazzName, File root) {
@@ -107,13 +107,23 @@ public class WebdavServlet extends WebDavServletBean {
 		return listener;
 	}
 
+    private boolean getBooleanInitParameter(String key, boolean defaultValue) {
+		String value = getInitParameter(key);
+		return value == null ? defaultValue : ("1".equals(value) || Boolean.getBoolean(value));
+	}
+
+	private int getIntInitParameter(String key, int defaultValue) {
+		String value = getInitParameter(key);
+		return value == null ? defaultValue : Integer.parseInt(value);
+	}
+
 	private File getFileRoot() {
-		String rootPath = getInitParameter(ROOTPATH_PARAMETER);
+		String rootPath = getInitParameter(INIT_PARAM_ROOTPATH);
 		if (rootPath == null) {
 			throw new WebdavException("missing parameter: "
-					+ ROOTPATH_PARAMETER);
+					+ INIT_PARAM_ROOTPATH);
 		}
-		if (rootPath.equals("*WAR-FILE-ROOT*")) {
+		if (rootPath.equals(INIT_PARAM_ROOTPATH_WAR_FILE_ROOT_VALUE)) {
 			String file = LocalFileSystemStore.class.getProtectionDomain()
 					.getCodeSource().getLocation().getFile().replace('\\', '/');
 			if (file.charAt(0) == '/'

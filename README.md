@@ -176,8 +176,8 @@ you want to store your vcards in your web.xml:
 
 ```
   "http://<ip/name + port of the server>/<name of the webapp>/<servlet-maping>"
-  for the above configuration: http://localhost:8080/carddav(
-```                          
+  for the above configuration: http://localhost:8080/carddav
+```
 
 This has been tested with:
 

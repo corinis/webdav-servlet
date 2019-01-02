@@ -1,122 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <name>WebDAV servlet</name>
-    <groupId>com.corinis.external</groupId>
-    <artifactId>webdav-servlet</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
-    <inceptionYear>2011</inceptionYear>
-    <description>Modified version of the net.sf.webdav-servlet:webdav-servlet imported from github (ifunsoftware)
+	<name>WebDAV servlet</name>
+	<groupId>com.corinis.external</groupId>
+	<artifactId>webdav-servlet</artifactId>
+	<version>2.1.0-SNAPSHOT</version>
+	<inceptionYear>2011</inceptionYear>
+	<description>Modified version of the net.sf.webdav-servlet:webdav-servlet imported from github (ifunsoftware)
 Extended with webdav extension from https://github.com/iviews/webdav-servlet (http://www.i-views.de/)</description>
 
-    <scm>
-        <connection>scm:git:https://github.com/corinis/webdav-servlet.git</connection>
-        <url>https://github.com/corinis/webdav-servlet</url>
-    </scm>
+	<scm>
+		<connection>scm:git:https://github.com/corinis/webdav-servlet.git</connection>
+		<url>https://github.com/corinis/webdav-servlet</url>
+	</scm>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
-	    <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.7</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock</artifactId>
-            <version>2.5.1</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-		    <groupId>org.codehaus.groovy</groupId>
-		    <artifactId>groovy</artifactId>
-		    <version>2.4.5</version>
-            <scope>test</scope>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.4</version>
 		</dependency>
-    </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.1</version>
-                <configuration>
-                    <testFailureIgnore>true</testFailureIgnore>
-                    <forkMode>always</forkMode>
-                </configuration>
-            </plugin>
-        </plugins>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
 
-    </build>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
 
-    <distributionManagement>
-        <repository>
-            <id>iviews-releases</id>
-            <name>iviews-releases-local</name>
-            <url>${iviews.baseUrl.repo}/libs-releases-local</url>
-        </repository>
-        <snapshotRepository>
-            <id>iviews-snapshots</id>
-            <name>iviews-snapshots-local</name>
-            <url>${iviews.baseUrl.repo}/libs-snapshots-local</url>
-        </snapshotRepository>
-    </distributionManagement>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>3.1.2.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.7</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock</artifactId>
+			<version>2.5.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>2.4.5</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
+					<forkMode>always</forkMode>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>iviews-releases</id>
+			<name>iviews-releases-local</name>
+			<url>${iviews.baseUrl.repo}/libs-releases-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>iviews-snapshots</id>
+			<name>iviews-snapshots-local</name>
+			<url>${iviews.baseUrl.repo}/libs-snapshots-local</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>
         

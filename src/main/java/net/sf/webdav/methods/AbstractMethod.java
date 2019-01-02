@@ -75,10 +75,12 @@ public abstract class AbstractMethod implements IMethodExecutor {
     
     protected static final String LOCAL_DATE_FORMAT = "dd/MM/yy' 'HH:mm:ss";
 
+	/**
+	 * GMT timezone - all HTTP dates are on GMT
+	 */
+	protected static final String TIMEZONE_GMT = "GMT"; 
+
     static {
-        /**
-         * GMT timezone - all HTTP dates are on GMT
-         */
         URL_ENCODER = new URLEncoder();
         URL_ENCODER.addSafeCharacter('-');
         URL_ENCODER.addSafeCharacter('_');
@@ -112,7 +114,6 @@ public abstract class AbstractMethod implements IMethodExecutor {
      */
     protected static final int TEMP_TIMEOUT = 10;
 
-    
     public String lastModifiedDateFormat(final Date date) {
         DateFormat df = thLastmodifiedDateFormat.poll();
         try {

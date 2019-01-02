@@ -18,6 +18,8 @@ package net.sf.webdav.exceptions;
 
 public class AccessDeniedException extends WebdavException {
 
+	private static final long serialVersionUID = 1L;
+
     public AccessDeniedException() {
         super();
     }
