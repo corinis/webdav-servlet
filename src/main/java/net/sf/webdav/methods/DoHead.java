@@ -67,11 +67,11 @@ public class DoHead extends AbstractMethod {
 
         StoredObject so;
         try {
-            so = _store.getStoredObject(transaction, path);
+            so = _store.getStoredObject(transaction, path, null);
             if (so == null) {
                 if (this._insteadOf404 != null && !_insteadOf404.trim().equals("")) {
                     path = this._insteadOf404;
-                    so = _store.getStoredObject(transaction, this._insteadOf404);
+                    so = _store.getStoredObject(transaction, this._insteadOf404, null);
                 }
             } else
                 bUriExists = true;

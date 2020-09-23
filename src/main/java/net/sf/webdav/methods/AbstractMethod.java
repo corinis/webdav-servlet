@@ -18,6 +18,9 @@ package net.sf.webdav.methods;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -198,9 +201,14 @@ public abstract class AbstractMethod implements IMethodExecutor {
      * @return the path without trailing /
      */
     protected String getCleanPath(String path) {
+    	if(path.startsWith("//"))
+    		path = path.substring(1);
 
         if (path.endsWith("/") && path.length() > 1)
             path = path.substring(0, path.length() - 1);
+        
+        if(!path.startsWith("/"))
+        	return "/" + path; 
         return path;
     }
 
@@ -344,7 +352,7 @@ public abstract class AbstractMethod implements IMethodExecutor {
      * @throws LockFailedException
      */
     protected boolean checkLocks(ITransaction transaction,
-            HttpServletRequest req, HttpServletResponse resp,
+    		HttpServletRequest req, HttpServletResponse resp,
             IResourceLocks resourceLocks, String path) throws IOException,
             LockFailedException {
 
@@ -459,4 +467,128 @@ public abstract class AbstractMethod implements IMethodExecutor {
         }
     }
 
+	public static String parseDestinationPath(HttpServletRequest request, String destinationPath) throws IOException {
+
+		// Remove url encoding from destination
+		destinationPath = URLDecoder.decode(destinationPath, "UTF8");
+		URI req;
+		try {
+			req = new URI(request.getRequestURI());
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
+		}
+		
+		int protocolIndex = destinationPath.indexOf("://");
+		if (protocolIndex >= 0) {
+			// if the Destination URL contains the protocol, we can safely
+			// trim everything upto the first "/" character after "://"
+			int firstSeparator = destinationPath.indexOf("/", protocolIndex + 4);
+			if (firstSeparator < 0) {
+				destinationPath = "/";
+			} else {
+				destinationPath = destinationPath.substring(firstSeparator);
+			}
+		} else {
+			String hostName = req.getHost();
+			if ((hostName != null) && (destinationPath.startsWith(hostName))) {
+				destinationPath = destinationPath.substring(hostName.length());
+			}
+
+			int portIndex = destinationPath.indexOf(":");
+			if (portIndex >= 0) {
+				destinationPath = destinationPath.substring(portIndex);
+			}
+
+			if (destinationPath.startsWith(":")) {
+				int firstSeparator = destinationPath.indexOf("/");
+				if (firstSeparator < 0) {
+					destinationPath = "/";
+				} else {
+					destinationPath = destinationPath.substring(firstSeparator);
+				}
+			}
+		}
+
+		// Normalize destination path (remove '.' and' ..')
+		destinationPath = normalize(destinationPath);
+
+		/*
+		String contextPath = req.getContextPath();
+		if ((contextPath != null) && (destinationPath.startsWith(contextPath))) {
+			destinationPath = destinationPath.substring(contextPath.length());
+		}
+		*/
+
+		String pathInfo = req.getPath();
+		if (pathInfo != null) {
+			/*
+			String servletPath = req.getServletPath();
+			if ((servletPath != null) && (destinationPath.startsWith(servletPath))) {
+				destinationPath = destinationPath.substring(servletPath.length());
+			}
+			*/
+		}
+
+		return destinationPath;
+	}
+	
+	
+	  /**
+     * Normalize a relative URI path that may have relative values ("/./",
+     * "/../", and so on ) it it. <strong>WARNING</strong> - This method is
+     * useful only for normalizing application-generated paths. It does not try
+     * to perform security checks for malicious input.
+     * 
+     * @param path
+     *      Relative path to be normalized
+     */
+    public static String normalize(String path) {
+
+        if (path == null)
+            return null;
+
+        // Create a place for the normalized path
+        String normalized = path;
+
+        if (normalized.equals("/."))
+            return "/";
+
+        // Add a leading "/" if necessary
+        if (!normalized.startsWith("/"))
+            normalized = "/" + normalized;
+
+        // Resolve occurrences of "//" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("//");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index)
+                    + normalized.substring(index + 1);
+        }
+
+        // Resolve occurrences of "/./" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/./");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index)
+                    + normalized.substring(index + 2);
+        }
+
+        // Resolve occurrences of "/../" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/../");
+            if (index < 0)
+                break;
+            if (index == 0)
+                return (null); // Trying to go outside our context
+            int index2 = normalized.lastIndexOf('/', index - 1);
+            normalized = normalized.substring(0, index2)
+                    + normalized.substring(index + 3);
+        }
+
+        // Return the normalized path that we have completed
+        return (normalized);
+
+    }
 }

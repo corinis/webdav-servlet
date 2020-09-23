@@ -76,7 +76,7 @@ public class WebDavServletBean extends HttpServlet {
 		IMimeTyper mimeTyper = new IMimeTyper() {
 			@Override
 			public String getMimeType(ITransaction transaction, String path) {
-				String retVal= _store.getStoredObject(transaction, path).getMimeType();
+				String retVal= _store.getStoredObject(transaction, path, null).getMimeType();
 				if ( retVal == null) {
 					retVal = getServletContext().getMimeType( path);
 				}

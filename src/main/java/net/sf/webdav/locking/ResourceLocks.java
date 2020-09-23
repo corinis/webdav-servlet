@@ -124,8 +124,7 @@ public class ResourceLocks implements IResourceLocks {
             }
         } else {
             // can not lock
-            LOG.trace("Lock resource at " + path + " failed because"
-                    + "\na parent or child resource is currently locked");
+            LOG.info("Lock resource at " + path + " failed because a parent or child resource is currently locked");
             return false;
         }
     }

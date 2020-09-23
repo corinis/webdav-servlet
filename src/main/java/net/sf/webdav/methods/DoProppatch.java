@@ -81,7 +81,7 @@ public class DoProppatch extends AbstractMethod {
             StoredObject so = null;
             LockedObject lo = null;
             try {
-                so = _store.getStoredObject(transaction, path);
+                so = _store.getStoredObject(transaction, path, null);
                 lo = _resourceLocks.getLockedObjectByPath(transaction,
                         getCleanPath(path));
 

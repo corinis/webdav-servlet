@@ -74,14 +74,14 @@ public class DoMkcol extends AbstractMethod {
                     TEMP_TIMEOUT, TEMPORARY)) {
                 StoredObject parentSo, so = null;
                 try {
-                    parentSo = _store.getStoredObject(transaction, parentPath);
+                    parentSo = _store.getStoredObject(transaction, parentPath, null);
 					if (parentSo == null) {
 						// parent not exists
 						resp.sendError(WebdavStatus.SC_CONFLICT);
 						return;
 					}
 					if (parentPath != null && parentSo.isFolder()) {
-                        so = _store.getStoredObject(transaction, path);
+                        so = _store.getStoredObject(transaction, path, null);
                         if (so == null) {
                             _store.createFolder(transaction, path);
                             resp.setStatus(WebdavStatus.SC_CREATED);

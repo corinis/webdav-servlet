@@ -50,7 +50,7 @@ public class DoGet extends DoHead {
             String path) {
 
         try {
-            StoredObject so = _store.getStoredObject(transaction, path);
+            StoredObject so = _store.getStoredObject(transaction, path, null);
             if (so.isNullResource()) {
                 String methodsAllowed = DeterminableMethod
                         .determineMethodsAllowed(so);
@@ -93,7 +93,7 @@ public class DoGet extends DoHead {
             HttpServletResponse resp, HttpServletRequest req)
             throws IOException {
 
-        StoredObject so = _store.getStoredObject(transaction, path);
+        StoredObject so = _store.getStoredObject(transaction, path, null);
         if (so == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, req
                     .getRequestURI());
@@ -142,7 +142,7 @@ public class DoGet extends DoHead {
                     childrenTemp.append("<td>");
                     childrenTemp.append("<a href=\"");
                     childrenTemp.append(child);
-                    StoredObject obj= _store.getStoredObject(transaction, path+"/"+child);
+                    StoredObject obj= _store.getStoredObject(transaction, path+"/"+child, null);
                     if (obj == null)
                     {
                         LOG.error("Should not return null for "+path+"/"+child);

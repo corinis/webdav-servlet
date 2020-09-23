@@ -112,7 +112,7 @@ public class DoReport extends AbstractMethod {
 
             StoredObject so = null;
             try {
-                so = _store.getStoredObject(transaction, path);
+                so = _store.getStoredObject(transaction, path, null);
                 if (so == null) {
                     resp.setContentType("text/xml; charset=UTF-8");
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, req
@@ -297,7 +297,7 @@ public class DoReport extends AbstractMethod {
             int type, Vector<String> propertiesVector)
             throws WebdavException {
 
-        StoredObject so = _store.getStoredObject(transaction, path);
+        StoredObject so = _store.getStoredObject(transaction, path, propertiesVector);
 
         boolean isFolder = so.isFolder();
         String mimeType = null;
@@ -541,8 +541,16 @@ public class DoReport extends AbstractMethod {
                     generatedXML.writeElement("DAV::supported-report-set",
                             XMLWriter.CLOSING);
 
-                } else {
-                    propertiesNotFound.addElement(property);
+                } else 
+                {
+                	String value = so.getProperties().get(property);
+                	if(value == null)
+                		propertiesNotFound.addElement(property);
+                	else {
+                    	generatedXML.writeElement(property, XMLWriter.OPENING);
+                    	generatedXML.writeText(value);
+                    	generatedXML.writeElement(property, XMLWriter.CLOSING);
+                	}
                 }
             }
             

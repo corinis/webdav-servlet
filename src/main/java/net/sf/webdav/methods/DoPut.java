@@ -15,6 +15,7 @@
  */
 package net.sf.webdav.methods;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class DoPut extends AbstractMethod {
                     TEMP_TIMEOUT, TEMPORARY)) {
                 StoredObject parentSo, so = null;
                 try {
-                    parentSo = _store.getStoredObject(transaction, parentPath);
+                    parentSo = _store.getStoredObject(transaction, parentPath, null);
                     if (parentPath != null && parentSo != null
                             && parentSo.isResource()) {
                         resp.sendError(WebdavStatus.SC_FORBIDDEN);
@@ -96,7 +97,7 @@ public class DoPut extends AbstractMethod {
                         return;
                     }
 
-                    so = _store.getStoredObject(transaction, path);
+                    so = _store.getStoredObject(transaction, path, null);
 
                     if (so == null) {
                         _store.createResource(transaction, path);
@@ -151,7 +152,7 @@ public class DoPut extends AbstractMethod {
                             .setResourceContent(transaction, path, req
                                     .getInputStream(), null, null);
 
-                    so = _store.getStoredObject(transaction, path);
+                    so = _store.getStoredObject(transaction, path, null);
                     if (resourceLength != -1)
                         so.setResourceLength(resourceLength);
                     // Now lets report back what was actually saved

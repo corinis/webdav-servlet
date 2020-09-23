@@ -24,6 +24,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import net.sf.webdav.ILockingListener;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
@@ -34,14 +42,6 @@ import net.sf.webdav.exceptions.WebdavException;
 import net.sf.webdav.fromcatalina.XMLWriter;
 import net.sf.webdav.locking.IResourceLocks;
 import net.sf.webdav.locking.LockedObject;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class DoLock extends AbstractMethod {
 
@@ -133,7 +133,7 @@ public class DoLock extends AbstractMethod {
     private void doLock(ITransaction transaction, HttpServletRequest req,
                         HttpServletResponse resp, State state) throws IOException, LockFailedException {
 
-        StoredObject so = _store.getStoredObject(transaction, state._path);
+        StoredObject so = _store.getStoredObject(transaction, state._path, null);
 
         if (so != null) {
             doLocking(transaction, req, resp, state);
@@ -184,7 +184,7 @@ public class DoLock extends AbstractMethod {
         StoredObject parentSo, nullSo = null;
 
         try {
-            parentSo = _store.getStoredObject(transaction, state._parentPath);
+            parentSo = _store.getStoredObject(transaction, state._parentPath, null);
 
             if(state._parentPath != null){
                 if(parentSo == null){
@@ -196,7 +196,7 @@ public class DoLock extends AbstractMethod {
             }
 
 
-            nullSo = _store.getStoredObject(transaction, state._path);
+            nullSo = _store.getStoredObject(transaction, state._path, null);
             if (nullSo == null) {
                 // resource doesn't exist
                 _store.createResource(transaction, state._path);
@@ -216,7 +216,7 @@ public class DoLock extends AbstractMethod {
                 sendLockFailError(transaction, req, resp, state);
                 return;
             }
-            nullSo = _store.getStoredObject(transaction, state._path);
+            nullSo = _store.getStoredObject(transaction, state._path, null);
             // define the newly created resource as null-resource
             nullSo.setNullResource(true);
 

@@ -268,7 +268,7 @@ public class LockedObject {
      * @return true if no locks at the parent path are forbidding a new lock
      */
     private boolean checkParents(boolean exclusive) {
-        if (_path.equals("/")) {
+        if (_path.equals("/") || _parent == null) {
             return true;
         } else {
             if (_owner == null) {

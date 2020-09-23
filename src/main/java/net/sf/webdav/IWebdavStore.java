@@ -33,6 +33,7 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.webdav.exceptions.WebdavException;
+import net.sf.webdav.fromcatalina.XMLWriter;
 
 /**
  * Interface for simple implementation of any store for the WebdavServlet
@@ -220,9 +221,12 @@ public interface IWebdavStore {
      *      transaction
      * @param uri
      *      URI
+     * @param 
+     * 	properties
+     * 	potential list of additional properties. The can be used to cache or prepare data
      * @return StoredObject
      */
-    StoredObject getStoredObject(ITransaction transaction, String uri);
+    StoredObject getStoredObject(ITransaction transaction, String uri, Vector<String> properties);
 
     /**
      * Creates a principal object from the request
@@ -262,4 +266,18 @@ public interface IWebdavStore {
 	 */
 	Map<String, String> getAdditionalProperties(String path, Vector<String> properties);
 
+	/**
+	 * Used for non-standard properties (i.e. in principals)
+	 * @param path the resource path
+	 * @param properties The not yet handled properties
+	 * @param so the stored object
+	 * @param out the xml writer for the response 
+	 * @return the vector of properties "still" not handled
+	 */
+	Vector<String> handleCustomProperties(String path, Vector<String> properties, StoredObject so,
+			XMLWriter out);
+
+	String getPrincipalUri(Principal principal);
+
+	
 }

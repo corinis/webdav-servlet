@@ -155,7 +155,7 @@ public class DoCopy extends AbstractMethod {
                 0, TEMP_TIMEOUT, TEMPORARY)) {
             StoredObject copySo, destinationSo = null;
             try {
-                copySo = _store.getStoredObject(transaction, path);
+                copySo = _store.getStoredObject(transaction, path, null);
                 // Retrieve the resources
                 if (copySo == null) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -171,7 +171,7 @@ public class DoCopy extends AbstractMethod {
                 }
 
                 destinationSo = _store.getStoredObject(transaction,
-                        destinationPath);
+                        destinationPath, null);
 
                 if (overwrite) {
 
@@ -238,7 +238,7 @@ public class DoCopy extends AbstractMethod {
             HttpServletRequest req, HttpServletResponse resp)
             throws WebdavException, IOException {
 
-        StoredObject sourceSo = _store.getStoredObject(transaction, sourcePath);
+        StoredObject sourceSo = _store.getStoredObject(transaction, sourcePath, null);
         if (sourceSo.isResource()) {
             _store.createResource(transaction, destinationPath);
             long resourceLength = _store.setResourceContent(transaction,
@@ -247,7 +247,7 @@ public class DoCopy extends AbstractMethod {
 
             if (resourceLength != -1) {
                 StoredObject destinationSo = _store.getStoredObject(
-                        transaction, destinationPath);
+                        transaction, destinationPath, null);
                 destinationSo.setResourceLength(resourceLength);
             }
 
@@ -305,7 +305,7 @@ public class DoCopy extends AbstractMethod {
                 children[i] = "/" + children[i];
                 try {
                     childSo = _store.getStoredObject(transaction,
-                            (sourcePath + children[i]));
+                            (sourcePath + children[i]), null);
                     if (childSo.isResource()) {
                         _store.createResource(transaction, destinationPath
                                 + children[i]);
@@ -317,7 +317,7 @@ public class DoCopy extends AbstractMethod {
                         if (resourceLength != -1) {
                             StoredObject destinationSo = _store
                                     .getStoredObject(transaction,
-                                            destinationPath + children[i]);
+                                            destinationPath + children[i], null);
                             destinationSo.setResourceLength(resourceLength);
                         }
 
@@ -366,67 +366,5 @@ public class DoCopy extends AbstractMethod {
         return RequestUtil.parseDestinationPath(req, destinationPath);
     }
 
-    /**
-     * Return a context-relative path, beginning with a "/", that represents the
-     * canonical version of the specified path after ".." and "." elements are
-     * resolved out. If the specified path attempts to go outside the boundaries
-     * of the current context (i.e. too many ".." path elements are present),
-     * return <code>null</code> instead.
-     * 
-     * @param path
-     *      Path to be normalized
-     * @return normalized path
-     */
-    protected String normalize(String path) {
-
-        if (path == null)
-            return null;
-
-        // Create a place for the normalized path
-        String normalized = path;
-
-        if (normalized.equals("/."))
-            return "/";
-
-        // Normalize the slashes and add leading slash if necessary
-        if (normalized.indexOf('\\') >= 0)
-            normalized = normalized.replace('\\', '/');
-        if (!normalized.startsWith("/"))
-            normalized = "/" + normalized;
-
-        // Resolve occurrences of "//" in the normalized path
-        while (true) {
-            int index = normalized.indexOf("//");
-            if (index < 0)
-                break;
-            normalized = normalized.substring(0, index)
-                    + normalized.substring(index + 1);
-        }
-
-        // Resolve occurrences of "/./" in the normalized path
-        while (true) {
-            int index = normalized.indexOf("/./");
-            if (index < 0)
-                break;
-            normalized = normalized.substring(0, index)
-                    + normalized.substring(index + 2);
-        }
-
-        // Resolve occurrences of "/../" in the normalized path
-        while (true) {
-            int index = normalized.indexOf("/../");
-            if (index < 0)
-                break;
-            if (index == 0)
-                return (null); // Trying to go outside our context
-            int index2 = normalized.lastIndexOf('/', index - 1);
-            normalized = normalized.substring(0, index2)
-                    + normalized.substring(index + 3);
-        }
-
-        // Return the normalized path that we have completed
-        return (normalized);
-
-    }
 
 }

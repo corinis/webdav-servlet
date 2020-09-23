@@ -75,7 +75,7 @@ public class DoUnlock extends DeterminableMethod {
 
                         if (_resourceLocks.unlock(transaction, lockId, owner)) {
                             StoredObject so = _store.getStoredObject(
-                                    transaction, path);
+                                    transaction, path, null);
                             if (so.isNullResource()) {
                                 _store.removeObject(transaction, path);
                             }

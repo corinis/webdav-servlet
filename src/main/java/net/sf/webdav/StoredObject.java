@@ -21,6 +21,7 @@ package net.sf.webdav;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class StoredObject {
@@ -29,11 +30,16 @@ public class StoredObject {
     private Date lastModified;
     private Date creationDate;
     private long contentLength;
-    private String  mimeType;
+    private String mimeType;
 
     private boolean isNullRessource;
     
     private List<String> resourceTypes = new ArrayList<String>();
+    private List<DavPrivileges> privileges = new ArrayList<DavPrivileges>();
+    /**
+     * store additional properties for caching
+     */
+    private HashMap<String, String> properties = new HashMap<String, String>();
 	private String etag;
 
     /**
@@ -43,6 +49,13 @@ public class StoredObject {
      */
     public boolean isFolder() {
         return (isFolder);
+    }
+    /**
+     * override this to generate your own href
+     * @return the href of the resource
+     */
+    public String getHref() {
+    	return null;
     }
 
     /**
@@ -182,4 +195,31 @@ public class StoredObject {
 	public void setEtag(String etag) {
 		this.etag = etag;
 	}
+
+	/**
+	 * @return the privileges
+	 */
+	public List<DavPrivileges> getPrivileges() {
+		return privileges;
+	}
+
+	/**
+	 * @param privileges the privileges to set
+	 */
+	public void setPrivileges(List<DavPrivileges> privileges) {
+		this.privileges = privileges;
+	}
+	/**
+	 * @return the properties
+	 */
+	public HashMap<String, String> getProperties() {
+		return properties;
+	}
+	/**
+	 * @param properties the properties to set
+	 */
+	public void setProperties(HashMap<String, String> properties) {
+		this.properties = properties;
+	}
+
 }

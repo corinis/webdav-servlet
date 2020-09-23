@@ -41,6 +41,7 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.webdav.exceptions.WebdavException;
+import net.sf.webdav.fromcatalina.XMLWriter;
 
 /**
  * A sample CardDav store.
@@ -261,7 +262,8 @@ public class CardDavFileStore implements IWebdavStore {
 	}
 
 	@Override
-	public StoredObject getStoredObject(ITransaction transaction, String uri) {
+	public StoredObject getStoredObject(ITransaction transaction, String uri,
+			Vector<String> properties) {
 		StoredObject so = null;
 		if(uri.equals("/")) {
             so = new StoredObject();
@@ -346,5 +348,15 @@ public class CardDavFileStore implements IWebdavStore {
 		return props;
 	}
 
+	@Override
+	public String getPrincipalUri(Principal principal) {
+		return "/principals/users/" + (principal==null?"GUEST":principal.getName()) + "/";
+	}
+
+	@Override
+	public Vector<String> handleCustomProperties(String path, Vector<String> properties, StoredObject so,
+			XMLWriter out) {
+		return properties;
+	}
 
 }

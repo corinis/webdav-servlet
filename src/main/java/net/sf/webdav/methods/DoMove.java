@@ -86,7 +86,7 @@ public class DoMove extends AbstractMethod {
                 try {
 
                     if(_store.supportsMoveOperation()){
-                        _store.moveResource(transaction, sourcePath, RequestUtil.parseDestinationPath(req, destinationPath));
+                        _store.moveResource(transaction, sourcePath, parseDestinationPath(req, destinationPath));
                     }else{
                         if (_doCopy.copyResource(transaction, req, resp)) {
 

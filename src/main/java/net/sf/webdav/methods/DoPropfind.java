@@ -26,6 +26,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+
+import net.sf.webdav.DavExtensionConfig;
 import net.sf.webdav.IMimeTyper;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
@@ -39,11 +45,6 @@ import net.sf.webdav.fromcatalina.XMLHelper;
 import net.sf.webdav.fromcatalina.XMLWriter;
 import net.sf.webdav.locking.LockedObject;
 import net.sf.webdav.locking.ResourceLocks;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 
 public class DoPropfind extends AbstractMethod {
 
@@ -98,7 +99,7 @@ public class DoPropfind extends AbstractMethod {
 
             StoredObject so = null;
             try {
-                so = _store.getStoredObject(transaction, path);
+                so = _store.getStoredObject(transaction, path, null);
                 if (so == null) {
                     resp.setContentType("text/xml; charset=UTF-8");
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, req
@@ -157,8 +158,15 @@ public class DoPropfind extends AbstractMethod {
                 XMLWriter generatedXML = new XMLWriter(resp.getWriter(),
                         namespaces);
                 generatedXML.writeXMLHeader();
-                generatedXML
-                        .writeElement("DAV::multistatus", XMLWriter.OPENING);
+                generatedXML.writeElement("DAV::multistatus", XMLWriter.OPENING);
+                
+                if(properties != null && properties.size() == 1) {
+                	// special case: check for etag but we dont support it
+                	if(properties.get(0).equals("DAV::getetag") && _store.getConfig().getEtagFormat() == DavExtensionConfig.ETAG_NONE) {
+                		_depth = 0;
+                	}
+                }
+                
                 if (_depth == 0) {
                     parseProperties(transaction, req, generatedXML, path,
                             propertyFindType, properties, _mimeTyper
@@ -252,12 +260,15 @@ public class DoPropfind extends AbstractMethod {
             HttpServletRequest req, XMLWriter generatedXML, String path,
             int type, Vector<String> propertiesVector, String mimeType)
             throws WebdavException {
-
-        StoredObject so = _store.getStoredObject(transaction, path);
+    	
+        StoredObject so = _store.getStoredObject(transaction, path, propertiesVector);
 
         boolean isFolder = so.isFolder();
         if(!so.isFolder()) {
         	mimeType = so.getMimeType();
+        }
+        if(so.getCreationDate() == null) {
+        	System.out.println(so.getHref());
         }
         final String creationdate = creationDateFormat(so.getCreationDate());
         final String lastModified = lastModifiedDateFormat(so.getLastModified());
@@ -272,22 +283,23 @@ public class DoPropfind extends AbstractMethod {
 
         // Generating href element
         generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
-
-        String href = req.getContextPath();
-        String servletPath = req.getServletPath();
-        if (servletPath != null) {
-            if ((href.endsWith("/")) && (servletPath.startsWith("/")))
-                href += servletPath.substring(1);
-            else
-                href += servletPath;
+        String href = so.getHref();
+        if(href == null) {
+	        //href = req.getPrefix() + req.getContextPath();
+        	href = path;
+	        
+	        if (href.endsWith("/") && path.startsWith("/"))
+	        {
+	        	if(!path.substring(1).contains(href.substring(0,href.length()-1)) && !href.contains(path))
+	        		href += path.substring(1);
+	        }
+	        else if (!path.contains(href))
+	            href += path;
+	        
+	        if ((isFolder) && (!href.endsWith("/")))
+	            href += "/";
         }
-        if ((href.endsWith("/")) && (path.startsWith("/")))
-            href += path.substring(1);
-        else
-            href += path;
-        if ((isFolder) && (!href.endsWith("/")))
-            href += "/";
-
+        
         generatedXML.writeText(rewriteUrl(href));
 
         generatedXML.writeElement("DAV::href", XMLWriter.CLOSING);
@@ -306,9 +318,11 @@ public class DoPropfind extends AbstractMethod {
             generatedXML.writeElement("DAV::prop", XMLWriter.OPENING);
 
             generatedXML.writeProperty("DAV::creationdate", creationdate);
-            generatedXML.writeElement("DAV::displayname", XMLWriter.OPENING);
-            generatedXML.writeData(resourceName);
-            generatedXML.writeElement("DAV::displayname", XMLWriter.CLOSING);
+            if(resourceName != null) {
+	            generatedXML.writeElement("DAV::displayname", XMLWriter.OPENING);
+	            generatedXML.writeText(resourceName);
+	            generatedXML.writeElement("DAV::displayname", XMLWriter.CLOSING);
+            }
             if (!isFolder) {
                 generatedXML
                         .writeProperty("DAV::getlastmodified", lastModified);
@@ -319,7 +333,10 @@ public class DoPropfind extends AbstractMethod {
                     generatedXML.writeProperty("DAV::getcontenttype",
                             contentType);
                 }
-                generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
+                if(_store.getConfig().getEtagFormat() != DavExtensionConfig.ETAG_NONE) {
+                	generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
+                }
+                
                 generatedXML.writeElement("DAV::resourcetype",
                         XMLWriter.NO_CONTENT);
             } else {
@@ -336,6 +353,18 @@ public class DoPropfind extends AbstractMethod {
                 generatedXML.writeElement("DAV::resourcetype",
                         XMLWriter.CLOSING);
             }
+            
+            generatedXML.writeElement("DAV::current-user-principal", XMLWriter.OPENING);
+            	generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
+            		generatedXML.writeText(_store.getPrincipalUri(transaction.getPrincipal()));
+            	generatedXML.writeElement("DAV::href", XMLWriter.CLOSING);
+            generatedXML.writeElement("DAV::current-user-principal",XMLWriter.CLOSING);
+
+        	generatedXML.writeElement("DAV::current-user-privilege-set", XMLWriter.OPENING);
+        	for(net.sf.webdav.DavPrivileges p : so.getPrivileges()) {
+        		p.write(generatedXML);
+        	}
+            generatedXML.writeElement("DAV::current-user-privilege-set", XMLWriter.CLOSING);
 
             writeSupportedLockElements(transaction, generatedXML, path);
 
@@ -365,7 +394,9 @@ public class DoPropfind extends AbstractMethod {
                         XMLWriter.NO_CONTENT);
                 generatedXML.writeElement("DAV::getcontenttype",
                         XMLWriter.NO_CONTENT);
-                generatedXML.writeElement("DAV::getetag", XMLWriter.NO_CONTENT);
+                if(_store.getConfig().getEtagFormat() != DavExtensionConfig.ETAG_NONE) {
+                	generatedXML.writeElement("DAV::getetag", XMLWriter.NO_CONTENT);
+                }
                 generatedXML.writeElement("DAV::getlastmodified",
                         XMLWriter.NO_CONTENT);
             }
@@ -374,7 +405,8 @@ public class DoPropfind extends AbstractMethod {
             generatedXML.writeElement("DAV::supportedlock",
                     XMLWriter.NO_CONTENT);
             generatedXML.writeElement("DAV::source", XMLWriter.NO_CONTENT);
-
+            generatedXML.writeElement("DAV::current-user-principal", XMLWriter.NO_CONTENT);
+            
             generatedXML.writeElement("DAV::prop", XMLWriter.CLOSING);
             generatedXML.writeElement("DAV::status", XMLWriter.OPENING);
             generatedXML.writeText(status);
@@ -402,11 +434,19 @@ public class DoPropfind extends AbstractMethod {
                     generatedXML.writeProperty("DAV::creationdate",
                             creationdate);
                 } else if (property.equals("DAV::displayname")) {
-                    generatedXML.writeElement("DAV::displayname",
+                	if(resourceName != null && !resourceName.isEmpty()) {
+	                    generatedXML.writeElement("DAV::displayname", XMLWriter.OPENING);
+	                    generatedXML.writeText(resourceName);
+	                    generatedXML.writeElement("DAV::displayname", XMLWriter.CLOSING);
+                	}
+                } else if(property.equals("DAV::current-user-principal")) { 
+                    generatedXML.writeElement("DAV::current-user-principal",
                             XMLWriter.OPENING);
-                    generatedXML.writeData(resourceName);
-                    generatedXML.writeElement("DAV::displayname",
-                            XMLWriter.CLOSING);
+                	generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
+            		generatedXML.writeText(_store.getPrincipalUri(transaction.getPrincipal()));
+            		generatedXML.writeElement("DAV::href", XMLWriter.CLOSING);
+                    generatedXML.writeElement("DAV::current-user-principal",
+                            XMLWriter.CLOSING);                	
                 } else if (property.equals("DAV::getcontentlanguage")) {
                     if (isFolder) {
                         propertiesNotFound.addElement(property);
@@ -429,10 +469,14 @@ public class DoPropfind extends AbstractMethod {
                                 mimeType);
                     }
                 } else if (property.equals("DAV::getetag")) {
-                    if (isFolder || so.isNullResource()) {
-                        propertiesNotFound.addElement(property);
+                	if(_store.getConfig().getEtagFormat() != DavExtensionConfig.ETAG_NONE) {
+	                    if (isFolder || so.isNullResource()) {
+	                        propertiesNotFound.addElement(property);
+	                    } else {
+	                        generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
+	                    }
                     } else {
-                        generatedXML.writeProperty("DAV::getetag", getETag(so, _store.getConfig().getEtagFormat()));
+                    	propertiesNotFound.addElement(property);
                     }
                 } else if (property.equals("DAV::getlastmodified")) {
                     if (isFolder) {
@@ -486,7 +530,12 @@ public class DoPropfind extends AbstractMethod {
                 } else {
                     propertiesNotFound.addElement(property);
                 }
-
+                
+            }
+            
+            // allow handling of custom properties
+            if(propertiesNotFound.size() > 0) {
+            	propertiesNotFound = _store.handleCustomProperties(path, propertiesNotFound, so, generatedXML);
             }
             
             // special case: found none of the properties - write directly
@@ -530,7 +579,7 @@ public class DoPropfind extends AbstractMethod {
         so = null;
     }
 
-    private void writePropertiesNotFound(XMLWriter generatedXML, Vector<String> propertiesNotFound) {
+	private void writePropertiesNotFound(XMLWriter generatedXML, Vector<String> propertiesNotFound) {
     	Enumeration<String> propertiesNotFoundList = propertiesNotFound
                 .elements();
 

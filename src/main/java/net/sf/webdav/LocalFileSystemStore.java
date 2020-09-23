@@ -34,6 +34,7 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.webdav.exceptions.WebdavException;
+import net.sf.webdav.fromcatalina.XMLWriter;
 
 /**
  * Reference Implementation of WebdavStore
@@ -207,7 +208,8 @@ public class LocalFileSystemStore implements IWebdavStore {
         return file.length();
     }
 
-    public StoredObject getStoredObject(ITransaction transaction, String uri) {
+    public StoredObject getStoredObject(ITransaction transaction, String uri,
+			Vector<String> properties) {
 
         StoredObject so = null;
 
@@ -259,4 +261,16 @@ public class LocalFileSystemStore implements IWebdavStore {
 		// report not supported at all
 		return null;
 	}
+
+	@Override
+	public String getPrincipalUri(Principal principal) {
+		return "/principals/users/" + (principal==null?"GUEST":principal.getName()) + "/";
+	}
+	
+	@Override
+	public Vector<String> handleCustomProperties(String path, Vector<String> properties, StoredObject so,
+			XMLWriter out) {
+		return properties;
+	}
+
 }

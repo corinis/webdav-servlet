@@ -125,7 +125,7 @@ public class DoDelete extends AbstractMethod {
 
         if (!_readOnly) {
 
-            StoredObject so = _store.getStoredObject(transaction, path);
+            StoredObject so = _store.getStoredObject(transaction, path, null);
             if (so != null) {
 
                 if (so.isResource()) {
@@ -177,7 +177,7 @@ public class DoDelete extends AbstractMethod {
         for (int i = children.length - 1; i >= 0; i--) {
             children[i] = "/" + children[i];
             try {
-                so = _store.getStoredObject(transaction, path + children[i]);
+                so = _store.getStoredObject(transaction, path + children[i], null);
                 if (so.isResource()) {
                     _store.removeObject(transaction, path + children[i]);
 

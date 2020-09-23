@@ -56,7 +56,7 @@ public class DoOptions extends DeterminableMethod {
             try {
                 resp.addHeader("DAV", "1, 2");
 
-                so = _store.getStoredObject(transaction, path);
+                so = _store.getStoredObject(transaction, path, null);
                 String methodsAllowed = determineMethodsAllowed(so);
                 resp.addHeader("Allow", methodsAllowed);
                 resp.addHeader("MS-Author-Via", "DAV");

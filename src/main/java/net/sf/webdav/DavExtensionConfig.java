@@ -11,6 +11,13 @@ import java.util.List;
  */
 public class DavExtensionConfig {
 	
+	/**
+	 * does not support etags
+	 */
+	public static final int ETAG_NONE = -1;
+	/**
+	 * default etag
+	 */
 	public static final int ETAG_DEFAULT = 0;
 	public static final int ETAG_W = 1;
 	
