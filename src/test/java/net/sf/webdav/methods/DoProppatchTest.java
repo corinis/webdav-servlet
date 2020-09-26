@@ -1,18 +1,23 @@
 package net.sf.webdav.methods;
 
-import net.sf.webdav.*;
-import net.sf.webdav.locking.ResourceLocks;
-import net.sf.webdav.testutil.MockTest;
+import java.io.ByteArrayInputStream;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.DelegatingServletInputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.PrintWriter;
+import net.sf.webdav.IMimeTyper;
+import net.sf.webdav.ITransaction;
+import net.sf.webdav.IWebdavStore;
+import net.sf.webdav.StoredObject;
+import net.sf.webdav.WebdavStatus;
+import net.sf.webdav.locking.ResourceLocks;
+import net.sf.webdav.testutil.MockTest;
 
 public class DoProppatchTest extends MockTest {
     IWebdavStore mockStore;
@@ -67,7 +72,7 @@ public class DoProppatchTest extends MockTest {
 
                 StoredObject notExistingSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(notExistingSo));
 
                 oneOf(mockRes).sendError(WebdavStatus.SC_NOT_FOUND);
@@ -97,7 +102,7 @@ public class DoProppatchTest extends MockTest {
 
                 StoredObject testFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(testFileSo));
                 
                 oneOf(mockReq).getHeader("If");
@@ -140,7 +145,7 @@ public class DoProppatchTest extends MockTest {
 
                 StoredObject testFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(testFileSo));
                 
                 oneOf(mockReq).getHeader("If");

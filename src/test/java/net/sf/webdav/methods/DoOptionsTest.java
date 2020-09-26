@@ -5,6 +5,10 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+
 import net.sf.webdav.IMimeTyper;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
@@ -12,10 +16,6 @@ import net.sf.webdav.StoredObject;
 import net.sf.webdav.exceptions.LockFailedException;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
 
 public class DoOptionsTest extends MockTest {
 
@@ -52,7 +52,7 @@ public class DoOptionsTest extends MockTest {
 
                 StoredObject indexSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockRes).addHeader(
@@ -87,7 +87,7 @@ public class DoOptionsTest extends MockTest {
 
                 StoredObject indexSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockRes).addHeader("Allow", "OPTIONS, MKCOL, PUT");

@@ -1,15 +1,22 @@
 package net.sf.webdav.methods;
 
-import net.sf.webdav.*;
-import net.sf.webdav.locking.ResourceLocks;
-import net.sf.webdav.testutil.MockTest;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+import net.sf.webdav.DavExtensionConfig;
+import net.sf.webdav.IMimeTyper;
+import net.sf.webdav.ITransaction;
+import net.sf.webdav.IWebdavStore;
+import net.sf.webdav.StoredObject;
+import net.sf.webdav.WebdavStatus;
+import net.sf.webdav.locking.ResourceLocks;
+import net.sf.webdav.testutil.MockTest;
 
 public class DoPropfindTest extends MockTest {
     IWebdavStore mockStore;
@@ -53,7 +60,7 @@ public class DoPropfindTest extends MockTest {
                 oneOf(mockStore).getConfig();
                 will(returnValue(new DavExtensionConfig()));
                 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(rootSo));
 
                 oneOf(mockReq).getAttribute("javax.servlet.include.request_uri");
@@ -76,7 +83,7 @@ public class DoPropfindTest extends MockTest {
                 oneOf(mockMimeTyper).getMimeType(mockTransaction, path);
                 will(returnValue("text/xml; charset=UTF-8"));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(rootSo));
 
                 oneOf(mockReq).getContextPath();
@@ -90,7 +97,7 @@ public class DoPropfindTest extends MockTest {
 
                 StoredObject file1So = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path + "file1");
+                oneOf(mockStore).getStoredObject(mockTransaction, path + "file1", null);
                 will(returnValue(file1So));
 
                 oneOf(mockReq).getContextPath();
@@ -105,7 +112,7 @@ public class DoPropfindTest extends MockTest {
 
                 StoredObject file2So = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path + "file2");
+                oneOf(mockStore).getStoredObject(mockTransaction, path + "file2", null);
                 will(returnValue(file2So));
 
                 oneOf(mockReq).getContextPath();
@@ -150,7 +157,7 @@ public class DoPropfindTest extends MockTest {
                 oneOf(mockStore).getConfig();
                 will(returnValue(new DavExtensionConfig()));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
                 oneOf(mockReq).getAttribute("javax.servlet.include.request_uri");
@@ -173,7 +180,7 @@ public class DoPropfindTest extends MockTest {
                 oneOf(mockMimeTyper).getMimeType(mockTransaction, path);
                 will(returnValue("text/xml; charset=UTF-8"));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
                 oneOf(mockReq).getContextPath();
@@ -209,7 +216,7 @@ public class DoPropfindTest extends MockTest {
 
                 StoredObject notExistingSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(notExistingSo));
 
                 oneOf(mockRes).setContentType("text/xml; charset=UTF-8");

@@ -9,6 +9,11 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.DelegatingServletInputStream;
+
 import net.sf.webdav.IMimeTyper;
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
@@ -16,15 +21,6 @@ import net.sf.webdav.StoredObject;
 import net.sf.webdav.WebdavStatus;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.mock.web.DelegatingServletInputStream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.util.Locale;
 
 public class DoGetTest extends MockTest {
 
@@ -63,7 +59,7 @@ public class DoGetTest extends MockTest {
                 StoredObject indexSo = null;
 
                 exactly(2).of(mockStore).getStoredObject(mockTransaction,
-                        "/index.html");
+                        "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockReq).getRequestURI();
@@ -97,7 +93,7 @@ public class DoGetTest extends MockTest {
 
                 StoredObject indexSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockReq).getHeader("If-None-Match");
@@ -116,7 +112,7 @@ public class DoGetTest extends MockTest {
 
                 StoredObject so = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(so));
 
                 oneOf(mockRes).getOutputStream();
@@ -154,13 +150,13 @@ public class DoGetTest extends MockTest {
                 StoredObject aaa = initFolderStoredObject();
                 StoredObject bbb = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/", null);
                 will(returnValue(fooSo));
 
                 oneOf(mockReq).getHeader("If-None-Match");
                 will(returnValue(null));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/", null);
                 will(returnValue(fooSo));
 
                 allowing(mockReq).getLocale();
@@ -177,10 +173,10 @@ public class DoGetTest extends MockTest {
                 oneOf(mockStore).getChildrenNames(mockTransaction, "/foo/");
                 will(returnValue(new String[] { "AAA", "BBB" }));
                 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo//AAA");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo//AAA", null);
                 will(returnValue(aaa));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo//BBB");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo//BBB", null);
 				will(returnValue(bbb));
 
             }
@@ -210,7 +206,7 @@ public class DoGetTest extends MockTest {
 
                 StoredObject fooSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/", null);
                 will(returnValue(fooSo));
 
                 oneOf(mockReq).getRequestURI();
@@ -244,12 +240,12 @@ public class DoGetTest extends MockTest {
 
                 StoredObject indexSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 StoredObject alternativeSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/alternative");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/alternative", null);
                 will(returnValue(alternativeSo));
 
                 oneOf(mockReq).getHeader("If-None-Match");
@@ -266,7 +262,7 @@ public class DoGetTest extends MockTest {
 
                 oneOf(mockRes).setContentType("text/foo");
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/alternative");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/alternative", null);
                 will(returnValue(alternativeSo));
 
                 tos = new TestingOutputStream();

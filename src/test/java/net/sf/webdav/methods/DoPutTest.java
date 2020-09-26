@@ -1,5 +1,14 @@
 package net.sf.webdav.methods;
 
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
@@ -8,13 +17,6 @@ import net.sf.webdav.locking.IResourceLocks;
 import net.sf.webdav.locking.LockedObject;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 
 public class DoPutTest extends MockTest {
     IWebdavStore mockStore;
@@ -69,12 +71,12 @@ public class DoPutTest extends MockTest {
 
                 StoredObject parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 StoredObject fileSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
                 oneOf(mockStore).createResource(mockTransaction, path);
@@ -90,7 +92,7 @@ public class DoPutTest extends MockTest {
 
                 fileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
                 // User-Agent: Goliath --> dont add ContentLength
@@ -120,7 +122,7 @@ public class DoPutTest extends MockTest {
 
                 StoredObject parentSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockRes).sendError(WebdavStatus.SC_NOT_FOUND, WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND));
@@ -150,14 +152,14 @@ public class DoPutTest extends MockTest {
 
                 StoredObject parentSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, parentPath);
 
                 StoredObject fileSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
                 oneOf(mockStore).createResource(mockTransaction, path);
@@ -173,7 +175,7 @@ public class DoPutTest extends MockTest {
 
                 fileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(fileSo));
 
             }
@@ -202,7 +204,7 @@ public class DoPutTest extends MockTest {
 
                 StoredObject parentSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockRes).sendError(WebdavStatus.SC_FORBIDDEN);
@@ -255,19 +257,19 @@ public class DoPutTest extends MockTest {
 
                 StoredObject lockNullResourceSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(lockNullResourceSo));
 
                 StoredObject parentSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, parentPath);
 
                 parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockStore).createResource(mockTransaction, path);
@@ -276,7 +278,7 @@ public class DoPutTest extends MockTest {
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_NO_CONTENT);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockReq).getInputStream();
@@ -356,10 +358,10 @@ public class DoPutTest extends MockTest {
 
                 parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockResourceLocks).getLockedObjectByPath(mockTransaction,
@@ -389,7 +391,7 @@ public class DoPutTest extends MockTest {
 
                 StoredObject newResourceSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(newResourceSo));
 
                 oneOf(mockResourceLocks).unlockTemporaryLockedObjects(

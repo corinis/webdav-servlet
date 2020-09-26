@@ -1,14 +1,19 @@
 package net.sf.webdav.methods;
 
-import net.sf.webdav.*;
-import net.sf.webdav.locking.ResourceLocks;
-import net.sf.webdav.testutil.MockTest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import net.sf.webdav.IMimeTyper;
+import net.sf.webdav.ITransaction;
+import net.sf.webdav.IWebdavStore;
+import net.sf.webdav.StoredObject;
+import net.sf.webdav.WebdavStatus;
+import net.sf.webdav.locking.ResourceLocks;
+import net.sf.webdav.testutil.MockTest;
 
 public class DoHeadTest extends MockTest {
 
@@ -44,7 +49,7 @@ public class DoHeadTest extends MockTest {
 
                 StoredObject indexSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_NOT_FOUND);
@@ -71,7 +76,7 @@ public class DoHeadTest extends MockTest {
 
                 StoredObject indexSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/index.html", null);
                 will(returnValue(indexSo));
 
                 oneOf(mockReq).getHeader("If-None-Match");
@@ -112,7 +117,7 @@ public class DoHeadTest extends MockTest {
 
                 StoredObject fooSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/");
+                oneOf(mockStore).getStoredObject(mockTransaction, "/foo/", null);
                 will(returnValue(fooSo));
 
                 oneOf(mockReq).getRequestURI();

@@ -5,6 +5,11 @@ import java.io.ByteArrayInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.DelegatingServletInputStream;
+
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
@@ -12,11 +17,6 @@ import net.sf.webdav.WebdavStatus;
 import net.sf.webdav.locking.LockedObject;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.mock.web.DelegatingServletInputStream;
 
 public class DoCopyTest extends MockTest {
 
@@ -105,7 +105,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject so = initLockNullStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, path);
+                oneOf(mockStore).getStoredObject(mockTransaction, path, null);
                 will(returnValue(so));
 
                 oneOf(mockRes).addHeader("Allow",
@@ -230,17 +230,17 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceFileSo));
 
                 StoredObject destFileSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(destFileSo));
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_CREATED);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceFileSo));
 
                 oneOf(mockStore).createResource(mockTransaction, destFilePath);
@@ -255,7 +255,7 @@ public class DoCopyTest extends MockTest {
 
                 destFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(destFileSo));
 
             }
@@ -382,19 +382,19 @@ public class DoCopyTest extends MockTest {
                 StoredObject sourceCollectionSo = initFolderStoredObject();
 
                 oneOf(mockStore).getStoredObject(mockTransaction,
-                        sourceCollectionPath);
+                        sourceCollectionPath, null);
                 will(returnValue(sourceCollectionSo));
 
                 StoredObject destCollectionSo = null;
 
                 oneOf(mockStore).getStoredObject(mockTransaction,
-                        destCollectionPath);
+                        destCollectionPath, null);
                 will(returnValue(destCollectionSo));
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_CREATED);
 
                 oneOf(mockStore).getStoredObject(mockTransaction,
-                        sourceCollectionPath);
+                        sourceCollectionPath, null);
                 will(returnValue(sourceCollectionSo));
 
                 oneOf(mockStore)
@@ -411,7 +411,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceFileSo));
 
                 oneOf(mockStore).createResource(mockTransaction,
@@ -427,7 +427,7 @@ public class DoCopyTest extends MockTest {
                 StoredObject destFileSo = initFileStoredObject(resourceContent);
 
                 oneOf(mockStore).getStoredObject(mockTransaction,
-                        destCollectionPath + "/sourceFile");
+                        destCollectionPath + "/sourceFile",  null);
                 will(returnValue(destFileSo));
 
             }
@@ -480,7 +480,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject notExistSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(notExistSo));
 
                 oneOf(mockRes).sendError(WebdavStatus.SC_NOT_FOUND);
@@ -512,7 +512,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockReq).getHeader("Destination");
@@ -538,7 +538,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject existingDestSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(existingDestSo));
 
                 oneOf(mockReq).getHeader("Overwrite");
@@ -546,12 +546,12 @@ public class DoCopyTest extends MockTest {
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_NO_CONTENT);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(existingDestSo));
 
                 oneOf(mockStore).removeObject(mockTransaction, destFilePath);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockStore).createResource(mockTransaction, destFilePath);
@@ -563,7 +563,7 @@ public class DoCopyTest extends MockTest {
                 oneOf(mockStore).setResourceContent(mockTransaction,
                         destFilePath, dsis, null, null);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(existingDestSo));
 
             }
@@ -593,7 +593,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockReq).getHeader("Destination");
@@ -619,7 +619,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject existingDestSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(existingDestSo));
 
                 oneOf(mockReq).getHeader("Overwrite");
@@ -653,7 +653,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockReq).getHeader("Destination");
@@ -679,17 +679,17 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject destFileSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(destFileSo));
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_NO_CONTENT);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(destFileSo));
 
                 oneOf(mockStore).removeObject(mockTransaction, destFilePath);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockStore).createResource(mockTransaction, destFilePath);
@@ -701,7 +701,7 @@ public class DoCopyTest extends MockTest {
                 oneOf(mockStore).setResourceContent(mockTransaction,
                         destFilePath, dsis, null, null);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, destFilePath, null);
                 will(returnValue(destFileSo));
             }
         });
@@ -729,7 +729,7 @@ public class DoCopyTest extends MockTest {
 
                 StoredObject sourceSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath);
+                oneOf(mockStore).getStoredObject(mockTransaction, sourceFilePath, null);
                 will(returnValue(sourceSo));
 
                 oneOf(mockReq).getHeader("Destination");
@@ -757,7 +757,7 @@ public class DoCopyTest extends MockTest {
                 StoredObject existingDestSo = initFolderStoredObject();
 
                 oneOf(mockStore).getStoredObject(mockTransaction,
-                        destCollectionPath);
+                        destCollectionPath, null);
                 will(returnValue(existingDestSo));
 
                 oneOf(mockRes).sendError(WebdavStatus.SC_PRECONDITION_FAILED);

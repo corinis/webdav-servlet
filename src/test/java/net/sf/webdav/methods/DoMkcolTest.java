@@ -6,6 +6,11 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.DelegatingServletInputStream;
+
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
@@ -14,11 +19,6 @@ import net.sf.webdav.locking.IResourceLocks;
 import net.sf.webdav.locking.LockedObject;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.mock.web.DelegatingServletInputStream;
 
 public class DoMkcolTest extends MockTest {
 
@@ -70,12 +70,12 @@ public class DoMkcolTest extends MockTest {
 
                 StoredObject parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 StoredObject mkcolSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(mkcolSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, mkcolPath);
@@ -105,7 +105,7 @@ public class DoMkcolTest extends MockTest {
 
                 StoredObject parentSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 String methodsAllowed = "OPTIONS, GET, HEAD, POST, DELETE, TRACE, "
@@ -138,12 +138,12 @@ public class DoMkcolTest extends MockTest {
 
                 StoredObject parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 StoredObject mkcolSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(mkcolSo));
 
                 oneOf(mockRes)
@@ -186,12 +186,12 @@ public class DoMkcolTest extends MockTest {
 
                 StoredObject parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 StoredObject mkcolSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(mkcolSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, mkcolPath);
@@ -281,19 +281,19 @@ public class DoMkcolTest extends MockTest {
 
                 StoredObject lockNullResourceSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 StoredObject parentSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, parentPath);
 
                 parentSo = initFolderStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockStore).createResource(mockTransaction, mkcolPath);
@@ -302,7 +302,7 @@ public class DoMkcolTest extends MockTest {
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_CREATED);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockReq).getInputStream();
@@ -365,10 +365,10 @@ public class DoMkcolTest extends MockTest {
                         with(any(int.class)), with(any(boolean.class)));
                 will(returnValue(true));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, mkcolPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockResourceLocks).getLockedObjectByPath(mockTransaction,

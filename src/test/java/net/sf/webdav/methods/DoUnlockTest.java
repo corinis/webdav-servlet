@@ -6,6 +6,11 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.DelegatingServletInputStream;
+
 import net.sf.webdav.ITransaction;
 import net.sf.webdav.IWebdavStore;
 import net.sf.webdav.StoredObject;
@@ -14,11 +19,6 @@ import net.sf.webdav.locking.IResourceLocks;
 import net.sf.webdav.locking.LockedObject;
 import net.sf.webdav.locking.ResourceLocks;
 import net.sf.webdav.testutil.MockTest;
-
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.mock.web.DelegatingServletInputStream;
 
 public class DoUnlockTest extends MockTest {
 
@@ -85,7 +85,7 @@ public class DoUnlockTest extends MockTest {
 
                 StoredObject lockedSo = initFileStoredObject(resourceContent);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, lockPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, lockPath, null);
                 will(returnValue(lockedSo));
 
                 oneOf(mockRes).setStatus(WebdavStatus.SC_NO_CONTENT);
@@ -213,17 +213,17 @@ public class DoUnlockTest extends MockTest {
 
                 StoredObject lockNullResourceSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 StoredObject parentSo = null;
 
-                oneOf(mockStore).getStoredObject(mockTransaction, parentPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, parentPath, null);
                 will(returnValue(parentSo));
 
                 oneOf(mockStore).createFolder(mockTransaction, parentPath);
 
-                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockStore).createResource(mockTransaction, nullLoPath);
@@ -232,7 +232,7 @@ public class DoUnlockTest extends MockTest {
 
                 lockNullResourceSo = initLockNullStoredObject();
 
-                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockReq).getInputStream();
@@ -306,7 +306,7 @@ public class DoUnlockTest extends MockTest {
                 oneOf(mockResourceLocks).unlock(mockTransaction, loId, owner);
                 will(returnValue(true));
 
-                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath);
+                oneOf(mockStore).getStoredObject(mockTransaction, nullLoPath, null);
                 will(returnValue(lockNullResourceSo));
 
                 oneOf(mockStore).removeObject(mockTransaction, nullLoPath);
