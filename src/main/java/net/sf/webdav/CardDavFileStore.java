@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.webdav.carddav.DavAddressBook;
+import net.sf.webdav.carddav.DavUser;
 import net.sf.webdav.exceptions.WebdavException;
 import net.sf.webdav.fromcatalina.XMLWriter;
 
@@ -61,6 +64,8 @@ public class CardDavFileStore implements IWebdavStore {
 
     private static int BUF_SIZE = 65536;
     
+    private static String ABOOK_ID = "default";
+
     private static String ABOOK_BASE = "addressbook";
     
     private static String ABOOK_URL = "/" + ABOOK_BASE;
@@ -69,6 +74,11 @@ public class CardDavFileStore implements IWebdavStore {
 
 	private DavExtensionConfig config;
 	
+	// root node: used to resolve everything
+	private ObjectTree root;
+	private DavUser user;
+	private DavAddressBook abook;
+		
 	public CardDavFileStore(File root) {
         _root = root;
 
@@ -82,6 +92,10 @@ public class CardDavFileStore implements IWebdavStore {
 				"urn:ietf:params:xml:ns:carddav:addressbook-query", 
 				"DAV::expand-property","DAV::principal-property-search","DAV::principal-search-property-set"
 				);
+		// TREE: [/dav/carddav]/addressbooks/USER/default/[addresses]
+		this.root = new ObjectTree("addressbooks", "");
+		this.user = new DavUser("GUEST", this.root);
+		abook = new DavAddressBook(ABOOK_ID, user);
 	}
 
 	@Override
@@ -207,21 +221,32 @@ public class CardDavFileStore implements IWebdavStore {
 			return new String[]{ABOOK_BASE};
 		}
 		
-        File file = getFile(folderUri);
-        String[] childrenNames = null;
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            List<String> childList = new ArrayList<String>();
-            String name = null;
-            for (int i = 0; i < children.length; i++) {
-                name = children[i].getName();
-                childList.add(name);
-                LOG.trace("Child " + i + ": " + name);
-            }
-            childrenNames = new String[childList.size()];
-            childrenNames = (String[]) childList.toArray(childrenNames);
-        }
-        return childrenNames;
+		// propfind on principals is handled in a custom way
+		if(folderUri.startsWith("/principals/users/")) {
+			return null;
+		}
+				
+		String[] parts = folderUri.split("/");
+		ObjectTree so = root.findByPath(parts);
+		if(so == abook) {
+	        File file = getFile(folderUri);
+	        String[] childrenNames = null;
+	        if (file.isDirectory()) {
+	            File[] children = file.listFiles();
+	            List<String> childList = new ArrayList<String>();
+	            String name = null;
+	            for (int i = 0; i < children.length; i++) {
+	                name = children[i].getName();
+	                childList.add(name);
+	                LOG.trace("Child " + i + ": " + name);
+	            }
+	            childrenNames = new String[childList.size()];
+	            childrenNames = (String[]) childList.toArray(childrenNames);
+	        }
+	        return childrenNames;
+		}
+		
+		return null;
 	}
 
 	/**
@@ -271,6 +296,16 @@ public class CardDavFileStore implements IWebdavStore {
             so.setLastModified(new Date(_root.lastModified()));
             so.setCreationDate(new Date(_root.lastModified()));
             so.setResourceLength(getResourceLength(transaction, uri));
+            return so;
+		}
+		
+
+		if(uri.startsWith("/principals/users/")) {
+			so = new StoredObject();
+            so.setFolder(true);
+            so.setLastModified(new Date());
+            so.setCreationDate(new Date());
+            so.setResourceLength(1);
             return so;
 		}
 		
@@ -354,9 +389,33 @@ public class CardDavFileStore implements IWebdavStore {
 	}
 
 	@Override
-	public Vector<String> handleCustomProperties(String path, Vector<String> properties, StoredObject so,
+	public Vector<String> handleCustomProperties(String path, Vector<String> propertiesVector, StoredObject so,
 			XMLWriter out) {
-		return properties;
-	}
+		Vector<String> propertiesNotFound = new Vector<String>();
+
+        // Parse the list of properties
+        Enumeration<String> properties = propertiesVector.elements();
+
+        while (properties.hasMoreElements()) {
+
+            String property = properties.nextElement();
+            //DAV::group-membership
+            
+            if(property.equals("urn:ietf:params:xml:ns:carddav:addressbook-home-set")) {
+                out.writeElement("urn:ietf:params:xml:ns:carddav:addressbook-home-set", XMLWriter.OPENING);
+            	out.writeElement("DAV::href", XMLWriter.OPENING);
+        			out.writeText(this.user.getHref());
+        		out.writeElement("DAV::href", XMLWriter.CLOSING);
+                out.writeElement("urn:ietf:params:xml:ns:carddav:addressbook-home-set", XMLWriter.CLOSING);
+
+            } 
+            else if(property.equals("DAV::group-membership")) {
+                out.writeElement("DAV::group-membership", XMLWriter.OPENING);
+                out.writeElement("DAV::group-membership", XMLWriter.CLOSING);
+            } else {
+            	propertiesNotFound.add(property);
+            }
+        }
+		return propertiesNotFound;	}
 
 }
