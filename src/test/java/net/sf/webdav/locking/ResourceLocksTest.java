@@ -4,12 +4,12 @@ import java.security.Principal;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.webdav.ILockingListener;
-import net.sf.webdav.ITransaction;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import sun.security.acl.PrincipalImpl;
+
+import net.sf.webdav.ILockingListener;
+import net.sf.webdav.ITransaction;
 
 /** @author knappmeier */
 public class ResourceLocksTest {
@@ -17,7 +17,13 @@ public class ResourceLocksTest {
     public static final ITransaction USER = new ITransaction() {
         @Override
         public Principal getPrincipal() {
-            return new PrincipalImpl("username");
+            return new Principal() {
+				
+				@Override
+				public String getName() {
+					return "username";
+				}
+			};
         }
 
         @Override
@@ -29,7 +35,13 @@ public class ResourceLocksTest {
     public static final ITransaction OTHER_USER = new ITransaction() {
         @Override
         public Principal getPrincipal() {
-            return new PrincipalImpl("other_user");
+            return new Principal() {
+				
+				@Override
+				public String getName() {
+					return "other";
+				}
+			};
         }
 
         @Override
