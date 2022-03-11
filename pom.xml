@@ -53,7 +53,7 @@ Extended with webdav extension from https://github.com/iviews/webdav-servlet (ht
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.7</version>
+			<version>1.2.3</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -101,17 +101,16 @@ Extended with webdav extension from https://github.com/iviews/webdav-servlet (ht
 	</build>
 
 	<distributionManagement>
-		<repository>
-			<id>iviews-releases</id>
-			<name>iviews-releases-local</name>
-			<url>${iviews.baseUrl.repo}/libs-releases-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>iviews-snapshots</id>
-			<name>iviews-snapshots-local</name>
-			<url>${iviews.baseUrl.repo}/libs-snapshots-local</url>
-		</snapshotRepository>
-	</distributionManagement>
-
+			<repository>
+				<id>corinis.corinis</id>
+				<url>http://build.internal.corinis.net/artifactory/corinis/</url>
+				<layout>default</layout>
+			</repository>
+			<snapshotRepository>
+				<id>corinis.dev</id>
+				<url>http://build.internal.corinis.net/artifactory/dev/</url>
+				<layout>default</layout>
+			</snapshotRepository>
+		</distributionManagement>
 </project>
         

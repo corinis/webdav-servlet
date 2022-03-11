@@ -10,6 +10,9 @@ which uses the local filesystem, is provided.
 Unlike large systems (like slide), this servlet only supports the most basic
 data access options. versioning or user management are not supported
 
+However it does support address book detection and extension for vCard (CardDav) 
+and might even work for iCal (CalDav).
+
 # REQUIREMENTS 
 
 - JDK 1.6 or above
@@ -148,6 +151,10 @@ Because of the simple core code, it will probably not work correctly if:
 - multi user support
 - clients use of different fields (i.e. one client supports images, the other one does not)
 
+## CALDAV
+
+The changes allow for extension to support caldav other dav variants, but are ot bundled.
+
 ### Configuration
 
 You need to set the CardDavFileStore class and the parameter "rootpath" to where 
@@ -183,6 +190,7 @@ This has been tested with:
 
 * [Thunderbird](https://www.mozilla.org/thunderbird/) and the [Sogo Connector 31.0.1](http://www.sogo.nu/downloads/frontends.html) (for this to work add the "/addressbook/" after the servlet mapping)
 * [Kontact](https://www.kde.org/applications/office/kontact/) 
+* Android
 
 Most fields even sync between this clients.
 
