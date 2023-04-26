@@ -100,17 +100,17 @@ Extended with webdav extension from https://github.com/iviews/webdav-servlet (ht
 
 	</build>
 
-	<distributionManagement>
-			<repository>
-				<id>corinis.corinis</id>
-				<url>http://build.internal.corinis.net/artifactory/corinis/</url>
-				<layout>default</layout>
-			</repository>
-			<snapshotRepository>
-				<id>corinis.dev</id>
-				<url>http://build.internal.corinis.net/artifactory/dev/</url>
-				<layout>default</layout>
-			</snapshotRepository>
-		</distributionManagement>
+<distributionManagement>
+		<repository>
+			<id>corinis.corinis</id>
+			<url>http://build.internal.corinis.net/nexus/repository/corinis-release/</url>
+			<layout>default</layout>
+		</repository>
+		<snapshotRepository>
+			<id>corinis.dev</id>
+			<url>http://build.internal.corinis.net/nexus/repository/corinis-snapshot/</url>
+			<layout>default</layout>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
         
