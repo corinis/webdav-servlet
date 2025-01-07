@@ -1,6 +1,7 @@
 package net.sf.webdav;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,7 +21,7 @@ public class WebdavStatus {
      * This Hashtable contains the mapping of HTTP and WebDAV status codes to
      * descriptive text. This is a static variable.
      */
-    private static Hashtable<Integer, String> _mapStatusCodes = new Hashtable<Integer, String>();
+    private static Map<Integer, String> _mapStatusCodes = new HashMap<>();
 
     // ------------------------------------------------------ HTTP Status Codes
 
@@ -246,12 +247,12 @@ public class WebdavStatus {
      *  (e.g., "OK").
      */
     public static String getStatusText(int nHttpStatusCode) {
-        Integer intKey = new Integer(nHttpStatusCode);
+        Integer intKey = nHttpStatusCode;
 
         if (!_mapStatusCodes.containsKey(intKey)) {
             return "";
         } else {
-            return (String) _mapStatusCodes.get(intKey);
+            return _mapStatusCodes.get(intKey);
         }
     }
 
@@ -267,7 +268,7 @@ public class WebdavStatus {
      *      [IN] HTTP status text
      */
     private static void addStatusCodeMap(int nKey, String strVal) {
-        _mapStatusCodes.put(new Integer(nKey), strVal);
+        _mapStatusCodes.put(nKey, strVal);
     }
 
 };

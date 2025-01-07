@@ -77,10 +77,10 @@ public class WebdavServlet extends WebDavServletBean {
 						.loadClass(clazzName);
 
 				Constructor<?> ctor = clazz
-						.getConstructor(new Class[] { File.class });
+						.getConstructor(File.class);
 
 				webdavStore = (IWebdavStore) ctor
-						.newInstance(new Object[] { root });
+						.newInstance(root);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(
@@ -97,7 +97,8 @@ public class WebdavServlet extends WebDavServletBean {
 			try {
 				Class<ILockingListener> clazz = (Class<ILockingListener>) WebdavServlet.class
 						.getClassLoader().loadClass(clazzName);
-				listener = clazz.newInstance();
+				listener = clazz.getDeclaredConstructor().newInstance();
+				
 			} catch (Exception e) {
 				throw new RuntimeException(
 						"Could not instantiate locking listener", e);

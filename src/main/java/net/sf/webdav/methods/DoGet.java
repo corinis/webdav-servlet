@@ -247,13 +247,13 @@ public class DoGet extends DoHead {
             if(iStream != null)
             {
                 // Found css via class loader, use that one
-                StringBuffer out = new StringBuffer();
+                StringBuilder out = new StringBuilder();
                 byte[] b = new byte[4096];
                 for (int n; (n = iStream.read(b)) != -1;)
                 {
                     out.append(new String(b, 0, n));
-}
-                retVal= out.toString();
+                }
+                retVal = out.toString();
             }
         }
         catch (Exception ex)
@@ -302,6 +302,6 @@ public class DoGet extends DoHead {
      */
     protected DateFormat getDateTimeFormat(Locale browserLocale)
     {
-        return SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.MEDIUM, browserLocale);
+        return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, browserLocale);
     }
  }

@@ -25,7 +25,6 @@ package net.sf.webdav;
 
 import java.io.InputStream;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -248,7 +247,7 @@ public interface IWebdavStore {
     
     DavExtensionConfig getConfig();
 
-	void addNamespace(HashMap<String, String> namespaces);
+	void addNamespace(Map<String, String> namespaces);
 
 	/**
 	 * when the webstore supports the REPORT functionality, this returns all sub-paths of

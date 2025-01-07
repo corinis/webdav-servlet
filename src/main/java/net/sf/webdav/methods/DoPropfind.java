@@ -140,7 +140,7 @@ public class DoPropfind extends AbstractMethod {
                     propertyFindType = FIND_ALL_PROP;
                 }
 
-                HashMap<String, String> namespaces = new HashMap<String, String>();
+                Map<String, String> namespaces = new HashMap<>();
                 namespaces.put("DAV:", "D");
                 _store.addNamespace(namespaces);
 
