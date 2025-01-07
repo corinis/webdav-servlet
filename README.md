@@ -15,7 +15,7 @@ and might even work for iCal (CalDav).
 
 # REQUIREMENTS 
 
-- JDK 1.6 or above
+- OpenJDK 11 or above
 - A servlet container
 - Apache Maven
 
@@ -34,7 +34,7 @@ Then in your project add the dependency:
 <dependency>
 	<groupId>com.corinis.external</groupId>
 	<artifactId>webdav-servlet</artifactId>
-	<version>2.1.0-SNAPSHOT</version>
+	<version>2.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -188,7 +188,7 @@ you want to store your vcards in your web.xml:
 
 This has been tested with:
 
-* [Thunderbird](https://www.mozilla.org/thunderbird/) and the [Sogo Connector 31.0.1](http://www.sogo.nu/downloads/frontends.html) (for this to work add the "/addressbook/" after the servlet mapping)
+* [Thunderbird](https://www.mozilla.org/thunderbird/) native (for this to work add the "/addressbook/" after the servlet mapping)
 * [Kontact](https://www.kde.org/applications/office/kontact/) 
 * Android
 
