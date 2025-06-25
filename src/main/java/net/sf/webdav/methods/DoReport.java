@@ -154,7 +154,7 @@ public class DoReport extends AbstractMethod {
                     propertyFindType = FIND_ALL_PROP;
                 }
 
-                HashMap<String, String> namespaces = new HashMap<String, String>();
+                HashMap<String, String> namespaces = new HashMap<>();
                 namespaces.put("DAV:", "D");
                 _store.addNamespace(namespaces);
 
@@ -230,7 +230,7 @@ public class DoReport extends AbstractMethod {
                         tempLockOwner);
             }
         } else {
-            Map<String, Integer> errorList = new HashMap<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<>();
             errorList.put(path, WebdavStatus.SC_LOCKED);
             sendReport(req, resp, errorList);
         }
@@ -312,8 +312,8 @@ public class DoReport extends AbstractMethod {
 
         generatedXML.writeElement("DAV::response", XMLWriter.OPENING);
         
-        String status = new String("HTTP/1.1 " + WebdavStatus.SC_OK + " "
-                + WebdavStatus.getStatusText(WebdavStatus.SC_OK));
+        String status = "HTTP/1.1 " + WebdavStatus.SC_OK + " "
+                + WebdavStatus.getStatusText(WebdavStatus.SC_OK);
 
         // Generating href element
         generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
@@ -443,7 +443,7 @@ public class DoReport extends AbstractMethod {
 
         case FIND_BY_PROPERTY:
 
-            Vector<String> propertiesNotFound = new Vector<String>();
+            Vector<String> propertiesNotFound = new Vector<>();
 
             // Parse the list of properties
 
@@ -454,7 +454,7 @@ public class DoReport extends AbstractMethod {
 
             while (properties.hasMoreElements()) {
 
-                String property = (String) properties.nextElement();
+                String property = properties.nextElement();
 
                 if (property.equals("DAV::creationdate")) {
                     generatedXML.writeProperty("DAV::creationdate",
@@ -726,7 +726,7 @@ public class DoReport extends AbstractMethod {
             }
 
             int timeout = (int) (lo.getTimeoutMillis() / 1000);
-            String timeoutStr = new Integer(timeout).toString();
+            String timeoutStr = String.valueOf(timeout);
             generatedXML.writeElement("DAV::timeout", XMLWriter.OPENING);
             generatedXML.writeText("Second-" + timeoutStr);
             generatedXML.writeElement("DAV::timeout", XMLWriter.CLOSING);

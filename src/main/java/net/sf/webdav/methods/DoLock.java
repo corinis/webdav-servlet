@@ -84,48 +84,48 @@ public class DoLock extends AbstractMethod {
         if (_readOnly) {
             resp.sendError(WebdavStatus.SC_FORBIDDEN);
             return;
-        } else {
-            state._path = getRelativePath(req);
-            state._parentPath = getParentPath(getCleanPath(state._path));
+        } 
+        
+        state._path = getRelativePath(req);
+        state._parentPath = getParentPath(getCleanPath(state._path));
 
-            if (!checkLocks(transaction, req, resp, _resourceLocks, state._path)) {
-                resp.setStatus(WebdavStatus.SC_LOCKED);
-                return; // resource is locked
-            }
+        if (!checkLocks(transaction, req, resp, _resourceLocks, state._path)) {
+            resp.setStatus(WebdavStatus.SC_LOCKED);
+            return; // resource is locked
+        }
 
-            if (!checkLocks(transaction, req, resp, _resourceLocks, state._parentPath)) {
-                resp.setStatus(WebdavStatus.SC_LOCKED);
-                return; // parent is locked
-            }
+        if (!checkLocks(transaction, req, resp, _resourceLocks, state._parentPath)) {
+            resp.setStatus(WebdavStatus.SC_LOCKED);
+            return; // parent is locked
+        }
 
-            // Mac OS Finder (whether 10.4.x or 10.5) can't store files
-            // because executing a LOCK without lock information causes a
-            // SC_BAD_REQUEST
-            state._userAgent = req.getHeader("User-Agent");
-            if (state._userAgent != null && state._userAgent.indexOf("Darwin") != -1) {
-                state._macLockRequest = true;
+        // Mac OS Finder (whether 10.4.x or 10.5) can't store files
+        // because executing a LOCK without lock information causes a
+        // SC_BAD_REQUEST
+        state._userAgent = req.getHeader("User-Agent");
+        if (state._userAgent != null && state._userAgent.indexOf("Darwin") != -1) {
+            state._macLockRequest = true;
 
-                String timeString = Long.toString(System.currentTimeMillis());
-                state._lockOwner = state._userAgent.concat(timeString);
-            }
+            String timeString = Long.toString(System.currentTimeMillis());
+            state._lockOwner = state._userAgent.concat(timeString);
+        }
 
-            String tempLockOwner = "doLock" + System.currentTimeMillis()
-                    + req.toString();
-            if (_resourceLocks.lock(transaction, state._path, tempLockOwner, false,
-                    0, TEMP_TIMEOUT, TEMPORARY)) {
-                try {
-                    if (req.getHeader("If") != null) {
-                        doRefreshLock(transaction, req, resp, state);
-                    } else {
-                        doLock(transaction, req, resp, state);
-                    }
-                } catch (LockFailedException e) {
-                    resp.sendError(WebdavStatus.SC_LOCKED);
-                    LOG.error("Lockfailed exception", e);
-                } finally {
-                    _resourceLocks.unlockTemporaryLockedObjects(transaction,
-                            state._path, tempLockOwner);
+        String tempLockOwner = "doLock" + System.currentTimeMillis()
+                + req.toString();
+        if (_resourceLocks.lock(transaction, state._path, tempLockOwner, false,
+                0, TEMP_TIMEOUT, TEMPORARY)) {
+            try {
+                if (req.getHeader("If") != null) {
+                    doRefreshLock(transaction, req, resp, state);
+                } else {
+                    doLock(transaction, req, resp, state);
                 }
+            } catch (LockFailedException e) {
+                resp.sendError(WebdavStatus.SC_LOCKED);
+                LOG.error("Lockfailed exception", e);
+            } finally {
+                _resourceLocks.unlockTemporaryLockedObjects(transaction,
+                        state._path, tempLockOwner);
             }
         }
     }
@@ -142,7 +142,6 @@ public class DoLock extends AbstractMethod {
             doNullResourceLock(transaction, req, resp, state);
         }
 
-        so = null;
         state._exclusive = false;
         state._type = null;
         state._lockOwner = null;

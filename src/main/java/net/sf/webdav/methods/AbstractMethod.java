@@ -51,13 +51,13 @@ import net.sf.webdav.locking.LockedObject;
 
 public abstract class AbstractMethod implements IMethodExecutor {
 
-    private static final Queue<DateFormat> thLastmodifiedDateFormat = new ConcurrentLinkedQueue<DateFormat>();
-    private static final Queue<DateFormat> thCreationDateFormat = new ConcurrentLinkedQueue<DateFormat>();
+    private static final Queue<DateFormat> thLastmodifiedDateFormat = new ConcurrentLinkedQueue<>();
+    private static final Queue<DateFormat> thCreationDateFormat = new ConcurrentLinkedQueue<>();
 
     /**
      * Array containing the safe characters set.
      */
-    protected final static URLEncoder URL_ENCODER;
+    protected static final URLEncoder URL_ENCODER;
 
     /**
      * Default depth is infite.
@@ -95,7 +95,7 @@ public abstract class AbstractMethod implements IMethodExecutor {
     /**
      * size of the io-buffer
      */
-    protected static int BUF_SIZE = 65536;
+    protected static final int BUF_SIZE = 65536;
 
     /**
      * Default lock timeout value.
@@ -275,9 +275,9 @@ public abstract class AbstractMethod implements IMethodExecutor {
         String resourceLength = "";
         String lastModified = "";
 
-        if (so != null && so.isResource()) {
-            resourceLength = new Long(so.getResourceLength()).toString();
-            lastModified = new Long(so.getLastModified().getTime()).toString();
+        if (so.isResource()) {
+            resourceLength = String.valueOf(so.getResourceLength());
+            lastModified = String.valueOf(so.getLastModified().getTime());
         }
 
         if (format == DavExtensionConfig.ETAG_W)
@@ -379,7 +379,6 @@ public abstract class AbstractMethod implements IMethodExecutor {
                     return false;
                 }
                 if (!loByIf.equals(loByPath)) {
-                    loByIf = null;
                     return false;
                 }
                 loByIf = null;
@@ -420,7 +419,7 @@ public abstract class AbstractMethod implements IMethodExecutor {
             String absoluteUri = req.getRequestURI();
             // String relativePath = getRelativePath(req);
 
-            HashMap<String, String> namespaces = new HashMap<String, String>();
+            Map<String, String> namespaces = new HashMap<>();
             namespaces.put("DAV:", "D");
 
             XMLWriter generatedXML = new XMLWriter(namespaces);

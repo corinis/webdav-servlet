@@ -104,15 +104,15 @@ public class DoProppatch extends AbstractMethod {
                 boolean lockTokenMatchesIfHeader = (lockTokens != null && lockTokens[0].equals(lo.getID()));
                 if (lo != null && lo.isExclusive() && !lockTokenMatchesIfHeader) {
                     // Object on specified path is LOCKED
-                    errorList = new HashMap<String, Integer>();
-                    errorList.put(path, new Integer(WebdavStatus.SC_LOCKED));
+                    errorList = new HashMap<>();
+                    errorList.put(path, WebdavStatus.SC_LOCKED);
                     sendReport(req, resp, errorList);
                     return;
                 }
 
                 List<String> toset = null;
                 List<String> toremove = null;
-                List<String> tochange = new Vector<String>();
+                List<String> tochange = new Vector<>();
                 // contains all properties from
                 // toset and toremove
 
@@ -143,7 +143,7 @@ public class DoProppatch extends AbstractMethod {
                     return;
                 }
 
-                HashMap<String, String> namespaces = new HashMap<String, String>();
+                Map<String, String> namespaces = new HashMap<>();
                 namespaces.put("DAV:", "D");
 
                 if (tosetNode != null) {
@@ -167,8 +167,8 @@ public class DoProppatch extends AbstractMethod {
                         .writeElement("DAV::multistatus", XMLWriter.OPENING);
 
                 generatedXML.writeElement("DAV::response", XMLWriter.OPENING);
-                String status = new String("HTTP/1.1 " + WebdavStatus.SC_OK
-                        + " " + WebdavStatus.getStatusText(WebdavStatus.SC_OK));
+                String status = "HTTP/1.1 " + WebdavStatus.SC_OK
+                        + " " + WebdavStatus.getStatusText(WebdavStatus.SC_OK);
 
                 // Generating href element
                 generatedXML.writeElement("DAV::href", XMLWriter.OPENING);
@@ -187,8 +187,7 @@ public class DoProppatch extends AbstractMethod {
 
                 for (Iterator<String> iter = tochange.iterator(); iter
                         .hasNext();) {
-                    String property = (String) iter.next();
-
+                    String property = iter.next();
                     generatedXML.writeElement("DAV::propstat",
                             XMLWriter.OPENING);
 

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -349,7 +350,7 @@ public class CardDavFileStore implements IWebdavStore {
 	}
 
 	@Override
-	public void addNamespace(HashMap<String, String> namespaces) {
+	public void addNamespace(Map<String, String> namespaces) {
 		namespaces.put("urn:ietf:params:xml:ns:carddav", "card");
 	}
 
@@ -364,14 +365,14 @@ public class CardDavFileStore implements IWebdavStore {
 			Vector<String> properties) {
 		
 		File file = getFile(path);
-		Map<String, String> props = new HashMap<String, String>();
+		Map<String, String> props = new HashMap<>();
 		if(properties != null) {
         	if(properties.remove("urn:ietf:params:xml:ns:carddav:address-data")) {
         		if(!file.isDirectory()) {
         			byte[] bytes;
 					try {
 						bytes = Files.readAllBytes(file.toPath());
-						props.put("urn:ietf:params:xml:ns:carddav:address-data", new String(bytes, Charset.forName("UTF-8")));
+						props.put("urn:ietf:params:xml:ns:carddav:address-data", new String(bytes, StandardCharsets.UTF_8));
 					} catch (IOException e) {
 						// re-add as not found
 						properties.add("urn:ietf:params:xml:ns:carddav:address-data");
@@ -391,7 +392,7 @@ public class CardDavFileStore implements IWebdavStore {
 	@Override
 	public Vector<String> handleCustomProperties(String path, Vector<String> propertiesVector, StoredObject so,
 			XMLWriter out) {
-		Vector<String> propertiesNotFound = new Vector<String>();
+		Vector<String> propertiesNotFound = new Vector<>();
 
         // Parse the list of properties
         Enumeration<String> properties = propertiesVector.elements();
