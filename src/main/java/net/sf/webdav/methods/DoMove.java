@@ -29,7 +29,6 @@ import net.sf.webdav.exceptions.AccessDeniedException;
 import net.sf.webdav.exceptions.LockFailedException;
 import net.sf.webdav.exceptions.ObjectAlreadyExistsException;
 import net.sf.webdav.exceptions.WebdavException;
-import net.sf.webdav.fromcatalina.RequestUtil;
 import net.sf.webdav.locking.ResourceLocks;
 
 public class DoMove extends AbstractMethod {
