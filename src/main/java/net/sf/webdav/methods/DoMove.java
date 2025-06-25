@@ -58,7 +58,7 @@ public class DoMove extends AbstractMethod {
             LOG.trace("-- " + this.getClass().getName());
 
             String sourcePath = getRelativePath(req);
-            Map<String, Integer> errorList = new HashMap<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<>();
 
             if (!checkLocks(transaction, req, resp, _resourceLocks, sourcePath)) {
                 resp.setStatus(WebdavStatus.SC_LOCKED);
@@ -89,7 +89,7 @@ public class DoMove extends AbstractMethod {
                     }else{
                         if (_doCopy.copyResource(transaction, req, resp)) {
 
-                            errorList = new HashMap<String, Integer>();
+                            errorList = new HashMap<>();
                             _doDelete.deleteResource(transaction, sourcePath,
                                     errorList, req, resp);
                             if (!errorList.isEmpty()) {

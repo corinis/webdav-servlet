@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -53,7 +54,7 @@ public class WebDavServletBean extends HttpServlet {
 	protected ResourceLocks _resLocks;
 	protected IWebdavStore _store;
 	protected ILockingListener _lockingListener;
-	private final HashMap<String, IMethodExecutor> _methodMap = new HashMap<String, IMethodExecutor>();
+	private final Map<String, IMethodExecutor> _methodMap = new HashMap<>();
 
 	public WebDavServletBean() {
 		try {
@@ -65,7 +66,7 @@ public class WebDavServletBean extends HttpServlet {
 
 	public void init(IWebdavStore store, ILockingListener lockingListener,
 			String dftIndexFile, String insteadOf404,
-			int nocontentLenghHeaders, boolean lazyFolderCreationOnPut) throws ServletException {
+			int nocontentLenghHeaders, boolean lazyFolderCreationOnPut) {
 
 		_store = store;
 		_lockingListener = lockingListener;

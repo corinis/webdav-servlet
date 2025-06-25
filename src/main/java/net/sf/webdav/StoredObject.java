@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StoredObject {
 
@@ -34,12 +35,12 @@ public class StoredObject {
 
     private boolean isNullRessource;
     
-    private List<String> resourceTypes = new ArrayList<String>();
-    private List<DavPrivileges> privileges = new ArrayList<DavPrivileges>();
+    private List<String> resourceTypes = new ArrayList<>();
+    private List<DavPrivileges> privileges = new ArrayList<>();
     /**
      * store additional properties for caching
      */
-    private HashMap<String, String> properties = new HashMap<String, String>();
+    private Map<String, String> properties = new HashMap<>();
 	private String etag;
 
     /**
@@ -212,13 +213,13 @@ public class StoredObject {
 	/**
 	 * @return the properties
 	 */
-	public HashMap<String, String> getProperties() {
+	public Map<String, String> getProperties() {
 		return properties;
 	}
 	/**
 	 * @param properties the properties to set
 	 */
-	public void setProperties(HashMap<String, String> properties) {
+	public void setProperties(Map<String, String> properties) {
 		this.properties = properties;
 	}
 

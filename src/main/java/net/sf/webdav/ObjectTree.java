@@ -20,7 +20,7 @@ public class ObjectTree extends StoredObject {
 
     protected ObjectTree parent;
     
-    private List<ObjectTree> children = new ArrayList<ObjectTree>();
+    private List<ObjectTree> children = new ArrayList<>();
     
     private String baseref;
     
@@ -117,7 +117,7 @@ public class ObjectTree extends StoredObject {
 		for(ObjectTree child: children) {
 			if(child.getName() == null || child.getName().equalsIgnoreCase(cur)) {
 				// go down one level
-				return child.findByPath((String[])Arrays.copyOfRange(path, 1, path.length));
+				return child.findByPath(Arrays.copyOfRange(path, 1, path.length));
 			}
 		}
 		

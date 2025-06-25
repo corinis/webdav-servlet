@@ -56,7 +56,7 @@ public class DoMkcol extends AbstractMethod {
             String path = getRelativePath(req);
             String parentPath = getParentPath(getCleanPath(path));
 
-            Map<String, Integer> errorList = new HashMap<String, Integer>();
+            Map<String, Integer> errorList = new HashMap<>();
 
             if (!checkLocks(transaction, req, resp, _resourceLocks, parentPath)) {
                 // TODO remove

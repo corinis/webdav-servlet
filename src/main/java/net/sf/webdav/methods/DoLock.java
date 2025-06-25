@@ -496,7 +496,7 @@ public class DoLock extends AbstractMethod {
     private void generateXMLReport(ITransaction transaction,
                                    HttpServletResponse resp, LockedObject lo, State state) throws IOException {
 
-        HashMap<String, String> namespaces = new HashMap<String, String>();
+        HashMap<String, String> namespaces = new HashMap<>();
         namespaces.put("DAV:", "D");
 
         resp.setStatus(WebdavStatus.SC_OK);
@@ -594,7 +594,7 @@ public class DoLock extends AbstractMethod {
     private void sendLockFailError(ITransaction transaction,
                                    HttpServletRequest req, HttpServletResponse resp, State state)
             throws IOException {
-        Map<String, Integer> errorList = new HashMap<String, Integer>();
+        Map<String, Integer> errorList = new HashMap<>();
         errorList.put(state._path, WebdavStatus.SC_LOCKED);
         sendReport(req, resp, errorList);
     }

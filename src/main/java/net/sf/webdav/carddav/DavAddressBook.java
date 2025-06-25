@@ -8,7 +8,7 @@ import net.sf.webdav.ObjectTree;
 
 public class DavAddressBook extends ObjectTree {
 	
-	private static List<DavPrivileges> privileges = new ArrayList<DavPrivileges>();
+	private static List<DavPrivileges> privileges = new ArrayList<>();
 	static {
 		privileges.add(DavPrivileges.WRITE);
 		privileges.add(DavPrivileges.WRITE_PROPERTIES);

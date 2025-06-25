@@ -105,7 +105,7 @@ public final class RequestUtil {
 
         char content[] = new char[message.length()];
         message.getChars(0, message.length(), content, 0);
-        StringBuffer result = new StringBuffer(content.length + 50);
+        StringBuilder result = new StringBuilder(content.length + 50);
         for (int i = 0; i < content.length; i++) {
             switch (content[i]) {
             case '<':
@@ -124,7 +124,7 @@ public final class RequestUtil {
                 result.append(content[i]);
             }
         }
-        return (result.toString());
+        return result.toString();
 
     }
 
@@ -222,11 +222,11 @@ public final class RequestUtil {
      */
     public static Cookie[] parseCookieHeader(String header) {
 
-        if ((header == null) || (header.length() < 1))
-            return (new Cookie[0]);
+        if (header == null || header.isEmpty())
+            return new Cookie[0];
 
-        ArrayList<Cookie> cookies = new ArrayList<Cookie>();
-        while (header.length() > 0) {
+        ArrayList<Cookie> cookies = new ArrayList<>();
+        while (!header.isEmpty()) {
             int semicolon = header.indexOf(';');
             if (semicolon < 0)
                 semicolon = header.length();
@@ -244,7 +244,7 @@ public final class RequestUtil {
                     String value = token.substring(equals + 1).trim();
                     cookies.add(new Cookie(name, value));
                 }
-            } catch (Throwable e) {
+            } catch (Exception ignore) {
                 ;
             }
         }
@@ -275,7 +275,7 @@ public final class RequestUtil {
     public static void parseParameters(Map<String, String[]> map, String data,
             String encoding) throws UnsupportedEncodingException {
 
-        if ((data != null) && (data.length() > 0)) {
+        if (data != null && !data.isEmpty()) {
 
             // use the specified encoding to extract bytes out of the
             // given string so that the encoding is not lost. If an

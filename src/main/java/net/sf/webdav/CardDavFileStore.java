@@ -28,7 +28,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -234,7 +233,7 @@ public class CardDavFileStore implements IWebdavStore {
 	        String[] childrenNames = null;
 	        if (file.isDirectory()) {
 	            File[] children = file.listFiles();
-	            List<String> childList = new ArrayList<String>();
+	            List<String> childList = new ArrayList<>();
 	            String name = null;
 	            for (int i = 0; i < children.length; i++) {
 	                name = children[i].getName();

@@ -18,8 +18,8 @@ package net.sf.webdav.methods;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -111,7 +111,7 @@ public class DoGet extends DoHead {
                 // TODO some folder response (for browsers, DAV tools
                 // use propfind) in html?
                 Locale locale = req.getLocale();
-                DateFormat shortDF= getDateTimeFormat(req.getLocale());
+                DateFormat shortDF = getDateTimeFormat(locale);
                 resp.setContentType("text/html");
                 resp.setCharacterEncoding("UTF8");
                 OutputStream out = resp.getOutputStream();
@@ -196,7 +196,7 @@ public class DoGet extends DoHead {
                 childrenTemp.append("</table>");
                 childrenTemp.append(getFooter(transaction, path, resp, req));
                 childrenTemp.append("</body></html>");
-                out.write(childrenTemp.toString().getBytes("UTF-8"));
+                out.write(childrenTemp.toString().getBytes(StandardCharsets.UTF_8));
             }
         }
     }

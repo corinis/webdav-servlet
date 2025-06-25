@@ -22,7 +22,7 @@ public class DavExtensionConfig {
 	public static final int ETAG_W = 1;
 	
 	private String davHeader = "1";
-	private List<String> supportedReportSets = new ArrayList<String>();
+	private List<String> supportedReportSets = new ArrayList<>();
 	private int etagFormat = ETAG_W;
 	private boolean supportsReport = false;
 	

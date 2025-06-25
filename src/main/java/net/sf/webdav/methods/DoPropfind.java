@@ -417,7 +417,7 @@ public class DoPropfind extends AbstractMethod {
 
         case FIND_BY_PROPERTY:
 
-            Vector<String> propertiesNotFound = new Vector<String>();
+            Vector<String> propertiesNotFound = new Vector<>();
 
             // Parse the list of properties
 
@@ -428,7 +428,7 @@ public class DoPropfind extends AbstractMethod {
 
             while (properties.hasMoreElements()) {
 
-                String property = (String) properties.nextElement();
+                String property = properties.nextElement();
 
                 if (property.equals("DAV::creationdate")) {
                     generatedXML.writeProperty("DAV::creationdate",
@@ -555,16 +555,16 @@ public class DoPropfind extends AbstractMethod {
 
             // write remaining missing properties
             if (!propertiesNotFound.isEmpty()) {
-                status = new String("HTTP/1.1 " + WebdavStatus.SC_NOT_FOUND
+                status = "HTTP/1.1 " + WebdavStatus.SC_NOT_FOUND
                         + " "
-                        + WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND));
+                        + WebdavStatus.getStatusText(WebdavStatus.SC_NOT_FOUND);
                 
                 generatedXML.writeElement("DAV::propstat", XMLWriter.OPENING);
                 generatedXML.writeElement("DAV::prop", XMLWriter.OPENING);
                 writePropertiesNotFound(generatedXML, propertiesNotFound);
                 generatedXML.writeElement("DAV::prop", XMLWriter.CLOSING);
                 generatedXML.writeElement("DAV::status", XMLWriter.OPENING);
-                generatedXML.writeText(status.toString());
+                generatedXML.writeText(status);
                 generatedXML.writeElement("DAV::status", XMLWriter.CLOSING);
                 generatedXML.writeElement("DAV::propstat", XMLWriter.CLOSING);
             }
@@ -585,7 +585,7 @@ public class DoPropfind extends AbstractMethod {
 
 
         while (propertiesNotFoundList.hasMoreElements()) {
-            generatedXML.writeElement((String) propertiesNotFoundList
+            generatedXML.writeElement(propertiesNotFoundList
                     .nextElement(), XMLWriter.NO_CONTENT);
         }
 
